@@ -1,0 +1,3 @@
+/Users/feliperabelo/MATENIGMA/cmake-build-debug/CMakeFiles/MATENIGMA.dir
+/Users/feliperabelo/MATENIGMA/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/feliperabelo/MATENIGMA/cmake-build-debug/CMakeFiles/rebuild_cache.dir

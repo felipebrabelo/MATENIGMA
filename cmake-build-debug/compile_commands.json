@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/Users/feliperabelo/MATENIGMA/cmake-build-debug",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -isystem /opt/local/include -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -I/opt/local/include -o CMakeFiles/MATENIGMA.dir/main.c.o -c /Users/feliperabelo/MATENIGMA/main.c",
+  "file": "/Users/feliperabelo/MATENIGMA/main.c"
+}
+]
