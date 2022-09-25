@@ -12,6 +12,10 @@ const int screenHeight = 720;
 
 //Fonte
 Font mono;
+
+//Texturas
+Texture2D card_back, cardfront;
+
 //Struct que define o conteúdo das cartas
 typedef struct {
     int valor1, valor2;
@@ -27,6 +31,19 @@ typedef struct {
     int tipo;
 } Posicao;
 
+
+typedef struct {
+    double inicio;
+    double atual;
+} Timer;
+
+void ComecaTimer(Timer *relogio) {
+    relogio->inicio = GetTime();
+}
+
+void VerificaTimer(Timer *relogio) {
+    relogio->atual = GetTime() - relogio->inicio;
+}
 
 void DrawTextB(const char *text, int posX, int posY, int fontSize, Color color) {
     DrawTextEx(mono, text, (Vector2) {posX, posY}, fontSize, 1, color);
@@ -115,12 +132,12 @@ void DistribuiCartas(Carta *cartas, Posicao *pos, char **cartas_string, int pare
     }
 }
 
-void GeraPosicaoCartasTela(Vector2 *pos_tela, int pares_quantidade, int offset) {
+void GeraPosicaoCartasTela(Vector2 *pos_tela, int pares_quantidade, Vector2 offset) {
     int i, j, cont = 0;
     for (i = 1; i <= 4; i++) {
         for (j = 1; j <= pares_quantidade / 2; j++) {
-            pos_tela[cont].x = offset + 15 * j + 120 * (j - 1);
-            pos_tela[cont].y = offset + 15 * i + 100 * (i - 1);
+            pos_tela[cont].x = offset.x + 15 * j + 120 * (j - 1);
+            pos_tela[cont].y = offset.y + 15 * i + 100 * (i - 1);
             cont++;
         }
     }
@@ -158,9 +175,7 @@ void ChecaSelecao(const Rectangle *cartas_objeto, const Vector2 mouse, bool *col
             if (colisao[i]) {
                 DrawRectangleLinesEx(cartas_objeto[i], 2, RED);
             }
-        }
-        else
-        {
+        } else {
             colisao[i] = false;
         }
     }
@@ -191,34 +206,32 @@ void EsperaSegundos(int segundos) {
 }
 
 
-void VerificaSePar(const int *carta_id, bool *carta_sel, int *num_carta_selec, bool *flag_remover,int *tentativas, int *acertos) {
+void VerificaSePar(const int *carta_id, bool *carta_sel, int *num_carta_selec, bool *flag_remover, int *tentativas,
+                   int *acertos) {
 
     if (carta_sel[0] && carta_sel[1]) {
         if (carta_id[0] == carta_id[1]) {
             flag_remover[num_carta_selec[0]] = true;
             flag_remover[num_carta_selec[1]] = true;
-            *acertos = *acertos+1;
+            *acertos = *acertos + 1;
         }
         num_carta_selec[0] = -1;
         num_carta_selec[1] = -1;
         carta_sel[0] = false;
         carta_sel[1] = false;
-        *tentativas = *tentativas+1;
+        *tentativas = *tentativas + 1;
         EsperaSegundos(1);
     }
 
 }
 
-int main(void) {
-
-    //Inicialização
-    InitWindow(screenWidth, screenHeight, "MATENIGMA");
-    SetTargetFPS(60);
-    mono = LoadFont("/Users/feliperabelo/MATENIGMA/resources/Monocraft.otf"); // OBS: mudar parametro para resources/Monocraft.otf
-    int pares_quantidade = 8;
-    int tentativas = 0 , acertos = 0;
+void GerarNivelJogo(int pares_quantidade, double tempo_total, double *pontos, bool *gameover_win, bool *gameover_lose,
+                    Vector2 offset) {
+    int tentativas = 0, acertos = 0;
+    Timer relogio;
+    char tempo[5];
+    double timeout = tempo_total;
     char tentativas_string[20];
-    bool gameover = false;
     int i;
     //Gerar as cartas
     Carta *cartas;
@@ -236,7 +249,7 @@ int main(void) {
     //Gerar posições na tela para as cartas
     Vector2 *pos_carta_tela;
     pos_carta_tela = (Vector2 *) malloc(pares_quantidade * 2 * sizeof(Vector2));
-    GeraPosicaoCartasTela(pos_carta_tela, pares_quantidade, 120);
+    GeraPosicaoCartasTela(pos_carta_tela, pares_quantidade, offset);
     //Gerar posições na tela para o texto
     Vector2 *pos_texto_tela;
     pos_texto_tela = (Vector2 *) malloc(pares_quantidade * 2 * sizeof(Vector2));
@@ -264,23 +277,34 @@ int main(void) {
     int carta_id[2] = {-1, -1};
     int num_carta_selec[2] = {-1, -1};
     bool flag_primeira_selecao = false;
-    //--------------------------------------------------------
-    while (!WindowShouldClose()&&!gameover) {
+
+    ComecaTimer(&relogio);
+
+    while (!WindowShouldClose() && !*gameover_win && !*gameover_lose) {
 
         //Update to retangulo que segue o mouse
 
         mouse.x = GetMouseX();
         mouse.y = GetMouseY();
-        sprintf(tentativas_string,"Tentativas: %i",tentativas);
+        sprintf(tentativas_string, "Tentativas: %i", tentativas);
+        VerificaTimer(&relogio);
+        timeout = tempo_total - relogio.atual;
+        sprintf(tempo, "%.0lf", timeout);
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        if(acertos>=pares_quantidade)
-        {
+        if (acertos >= pares_quantidade) {
             BeginDrawing();
-            DrawTextB("VOCE VENCEU!",screenWidth/2-200,screenHeight/2-100,50,BLACK);
+            DrawTextB("VOCE VENCEU!", screenWidth / 2 - 200, screenHeight / 2 - 100, 50, BLACK);
             EndDrawing();
             EsperaSegundos(5);
-            gameover = true;
+            *gameover_win = true;
+        }
+        if (timeout < 0) {
+            BeginDrawing();
+            DrawTextB("VOCE PERDEU!", screenWidth / 2 - 200, screenHeight / 2 - 100, 50, BLACK);
+            EndDrawing();
+            EsperaSegundos(5);
+            *gameover_lose = true;
         }
         for (i = 0; i < pares_quantidade * 2; i++) {
             if (!flag_remover[i]) {
@@ -308,24 +332,39 @@ int main(void) {
         } else {
             flag_primeira_selecao = false;
         }
-        DrawTextB(tentativas_string,screenWidth-200,screenHeight-100,20,BLACK);
+        DrawTextB(tentativas_string, screenWidth - 200, screenHeight - 100, 20, BLACK);
+        DrawTextB(tempo, screenWidth - 60, 30, 20, BLACK);
         EndDrawing();
-        VerificaSePar(carta_id, carta_sel, num_carta_selec, flag_remover,&tentativas,&acertos);
+        VerificaSePar(carta_id, carta_sel, num_carta_selec, flag_remover, &tentativas, &acertos);
     }
+    *pontos = (timeout * 1000) / (tentativas - acertos);
+}
 
+int main(void) {
+
+    //Inicialização
+    InitWindow(screenWidth, screenHeight, "MATENIGMA");
+    SetTargetFPS(60);
+    mono = LoadFont("resources/Monocraft.otf"); // OBS: mudar parametro para resources/Monocraft.otf
+    int i;
+    int pares_quantidade[4] = {6, 8, 10, 12};
+    double tempo_total[4] = {300, 250, 200, 150};
+    double pontos[4] = {0, 0, 0, 0};
+    double pontos_total;
+    bool gameover_win[4] = {false, false, false, false};
+    bool gameover_lose[4] = {false, false, false, false};
+    Vector2 offset = {120, 120};
+    GerarNivelJogo(pares_quantidade[0], tempo_total[0], &pontos[0], &gameover_win[0], &gameover_lose[0], offset);
+    for (i = 1; i < 4; i++) {
+        if (gameover_win[i - 1]) {
+            GerarNivelJogo(pares_quantidade[i], tempo_total[i], &pontos[i], &gameover_win[i], &gameover_lose[i],
+                           offset);
+        }
+    }
+    pontos_total = pontos[0]*0.2+pontos[1]*0.35+pontos[2]*0.65+pontos[3]*1.5;
+    SaveFileData("resources/ponto_individual.bin",&pontos_total, sizeof(double ));
     //Desinicialização
     CloseWindow();
-    free(flag_remover);
-    free(cartas);
-    free(pos);
-    for (i = 0; i < pares_quantidade*2; i++) {
-        free(cartas_string[i]);
-    }
-    free(cartas_string);
-    free(pos_carta_tela);
-    free(pos_texto_tela);
-    free(cartas_objeto);
-    free(colisao);
     UnloadFont(mono);
     return 0;
 }
