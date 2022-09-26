@@ -262,7 +262,6 @@ static void UpdateDrawFrame(void)
                 UpdateOptionsScreen();
 
                 if (FinishOptionsScreen() == 1) TransitionToScreen(MENU);
-                else if (FinishOptionsScreen() == 2) TransitionToScreen(GAMEPLAY);
 
             } break;
             case GAMEPLAY:

@@ -49,6 +49,7 @@ void UpdateMenuScreen(void)
 {
     // TODO: Update TITLE screen variables here!
 
+    // Press enter or tap to change to GAMEPLAY screen
     float button_width = 180;
     float button_height = 90;
     Vector2 mousePoint = { 0.0f, 0.0f };
@@ -67,18 +68,46 @@ void UpdateMenuScreen(void)
             PlaySound(fxCoin);
         }
     }
+ /*   else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        finishScreen = 2;
+        PlaySound(fxCoin);
+    }*/
 }
 
 // Title Screen Draw logic
 void DrawMenuScreen(void)
 {
+    Vector2 mousePoint = { 0.0f, 0.0f };
+    mousePoint = GetMousePosition();
+
     // TODO: Draw TITLE screen here!
-    float button_width = 180.0;
-    float button_height = 90.0;
+    int button_game_state = 1;
+    int button_instru_state = 1;
+    float button_width = 180;
+    float button_height = 90;
+    Rectangle button_game_bound = { (1280 / 2) - 80, 300, button_width, button_height };
+    Rectangle button_instru_bound = { (1280 / 2) - 80, 410, button_width, button_height };
+    if (CheckCollisionPointRec(mousePoint, button_game_bound)) {
+        button_game_state = 2;
+    }
+    else button_game_state = 1;
+
+    if (CheckCollisionPointRec(mousePoint, button_instru_bound)) {
+        button_instru_state = 2;
+    }
+    else button_instru_state = 1;
+
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), YELLOW);
-    DrawRectangle((1280 / 2) - 80, 300, button_width, button_height, RED);
-    DrawRectangle((1280 / 2) - 80, 410, button_width, button_height, RED);
+    if (button_game_state == 1)     DrawRectangle((1280 / 2) - 80, 300, button_width, button_height, RED);
+    else if (button_game_state == 2) DrawRectangle((1280 / 2) - 80, 300, button_width, button_height, GREEN);
+
+    if (button_instru_state == 1)    DrawRectangle((1280 / 2) - 80, 410, button_width, button_height, RED);
+    else if (button_instru_state == 2) DrawRectangle((1280 / 2) - 80, 410, button_width, button_height, GREEN);
+
     DrawTextEx(font, "MENU SCREEN", (Vector2){ 20, 10 }, font.baseSize*3.0f, 4, DARKGREEN);
+    DrawText("INICIAR", (1280 / 2) - 66, 328, 40, BLACK);
+    DrawText("DICAS", (1280 / 2) - 64, 438, 40, BLACK);
+    DrawText("PRESS ENTER or TAP to JUMP to GAMEPLAY SCREEN", 120, 220, 20, DARKGREEN);
 }
 
 // Title Screen Unload logic

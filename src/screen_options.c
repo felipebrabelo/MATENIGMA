@@ -25,7 +25,7 @@ void UpdateOptionsScreen(void)
     if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
     {
         finishScreen = 1;   // OPTIONS
-        //finishScreen = 2;   // GAMEPLAY
+        //finishScreen = 2;
         PlaySound(fxCoin);
     }
 }
@@ -34,7 +34,6 @@ void UpdateOptionsScreen(void)
 void DrawOptionsScreen(void)
 {
     // TODO: Draw OPTIONS screen here!
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), WHITE);
     DrawText("MATENIGMA", GetScreenWidth() / 3, GetScreenHeight() - 600, 60, DARKGREEN);
     DrawText("Forme pares clicando em duas cartas distintas", GetScreenWidth() / 8, GetScreenHeight() / 2, 40, DARKGREEN);
 }
