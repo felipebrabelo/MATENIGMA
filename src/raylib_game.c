@@ -98,7 +98,7 @@ int main(void)
         case LOGO: UnloadLogoScreen(); break;
         case TITLE: UnloadTitleScreen(); break;
         case MENU: UnloadMenuScreen(); break;;
-        case OPTIONS: UnloadMenuScreen(); break;
+        case OPTIONS: UnloadOptionsScreen(); break;
         case GAMEPLAY: UnloadGameplayScreen(); break;
         case ENDING: UnloadEndingScreen(); break;
         default: break;
@@ -256,12 +256,13 @@ static void UpdateDrawFrame(void)
 
                 if (FinishMenuScreen() == 1) TransitionToScreen(GAMEPLAY);
                 else if (FinishMenuScreen() == 2) TransitionToScreen(OPTIONS);
-            }
+            } break;
             case OPTIONS:
             {
                 UpdateOptionsScreen();
 
-                if (FinishOptionsScreen() == 5) TransitionToScreen(GAMEPLAY);
+                if (FinishOptionsScreen() == 1) TransitionToScreen(MENU);
+                else if (FinishOptionsScreen() == 2) TransitionToScreen(GAMEPLAY);
 
             } break;
             case GAMEPLAY:

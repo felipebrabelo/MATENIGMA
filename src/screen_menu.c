@@ -49,7 +49,6 @@ void UpdateMenuScreen(void)
 {
     // TODO: Update TITLE screen variables here!
 
-    // Press enter or tap to change to GAMEPLAY screen
     float button_width = 180;
     float button_height = 90;
     Vector2 mousePoint = { 0.0f, 0.0f };
@@ -68,24 +67,18 @@ void UpdateMenuScreen(void)
             PlaySound(fxCoin);
         }
     }
- /*   else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        finishScreen = 2;
-        PlaySound(fxCoin);
-    }*/
 }
 
 // Title Screen Draw logic
 void DrawMenuScreen(void)
 {
-
     // TODO: Draw TITLE screen here!
-    float button_width = 180;
-    float button_height = 90;
+    float button_width = 180.0;
+    float button_height = 90.0;
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), YELLOW);
     DrawRectangle((1280 / 2) - 80, 300, button_width, button_height, RED);
     DrawRectangle((1280 / 2) - 80, 410, button_width, button_height, RED);
     DrawTextEx(font, "MENU SCREEN", (Vector2){ 20, 10 }, font.baseSize*3.0f, 4, DARKGREEN);
-    DrawText("PRESS ENTER or TAP to JUMP to GAMEPLAY SCREEN", 120, 220, 20, DARKGREEN);
 }
 
 // Title Screen Unload logic
