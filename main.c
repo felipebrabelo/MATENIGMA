@@ -14,7 +14,11 @@ const int screenHeight = 720;
 Font mono;
 
 //Texturas
-Texture2D card_back, cardfront;
+Texture2D card_back, background, card_front,card_flip;
+
+//Sons
+
+Music musica_gameplay;
 
 //Struct que define o conteúdo das cartas
 typedef struct {
@@ -197,11 +201,11 @@ void SelecionaCarta(int *idcarta, int *num_carta_selec, const Posicao *pos, cons
     }
 }
 
-void EsperaSegundos(int segundos) {
+void EsperaSegundos(double segundos) {
     double inicio, fim;
     inicio = GetTime();
     while ((fim = GetTime() - inicio) < segundos) {
-
+        UpdateMusicStream(musica_gameplay);
     }
 }
 
@@ -225,6 +229,13 @@ void VerificaSePar(const int *carta_id, bool *carta_sel, int *num_carta_selec, b
 
 }
 
+void AnimarFlip(int dir,Vector2 *pos_carta_tela)
+{
+    if(dir == 1)
+    {
+
+    }
+}
 void GerarNivelJogo(int pares_quantidade, double tempo_total, double *pontos, bool *gameover_win, bool *gameover_lose,
                     Vector2 offset) {
     int tentativas = 0, acertos = 0;
@@ -277,66 +288,61 @@ void GerarNivelJogo(int pares_quantidade, double tempo_total, double *pontos, bo
     int carta_id[2] = {-1, -1};
     int num_carta_selec[2] = {-1, -1};
     bool flag_primeira_selecao = false;
-
     ComecaTimer(&relogio);
 
     while (!WindowShouldClose() && !*gameover_win && !*gameover_lose) {
 
         //Update to retangulo que segue o mouse
-
+        UpdateMusicStream(musica_gameplay);
         mouse.x = GetMouseX();
         mouse.y = GetMouseY();
         sprintf(tentativas_string, "Tentativas: %i", tentativas);
         VerificaTimer(&relogio);
         timeout = tempo_total - relogio.atual;
         sprintf(tempo, "%.0lf", timeout);
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
+
         if (acertos >= pares_quantidade) {
-            BeginDrawing();
-            DrawTextB("VOCE VENCEU!", screenWidth / 2 - 200, screenHeight / 2 - 100, 50, BLACK);
-            EndDrawing();
             EsperaSegundos(5);
             *gameover_win = true;
         }
         if (timeout < 0) {
-            BeginDrawing();
-            DrawTextB("VOCE PERDEU!", screenWidth / 2 - 200, screenHeight / 2 - 100, 50, BLACK);
-            EndDrawing();
             EsperaSegundos(5);
             *gameover_lose = true;
         }
-        for (i = 0; i < pares_quantidade * 2; i++) {
-            if (!flag_remover[i]) {
-                DrawRectangleRec(cartas_objeto[i], BLACK);
-            }
-        }
-        ChecaSelecao(cartas_objeto, mouse, colisao, pares_quantidade, flag_remover);
+        VerificaSePar(carta_id, carta_sel, num_carta_selec, flag_remover, &tentativas, &acertos);
         if (!carta_sel[0]) {
             SelecionaCarta(&carta_id[0], &num_carta_selec[0], pos, colisao, &carta_sel[0], pares_quantidade, -1);
-        }
-        if (num_carta_selec[0] != -1) {
-            DrawTextB(cartas_string[num_carta_selec[0]], pos_texto_tela[num_carta_selec[0]].x,
-                      pos_texto_tela[num_carta_selec[0]].y, 20, WHITE);
         }
         if (flag_primeira_selecao) {
             SelecionaCarta(&carta_id[1], &num_carta_selec[1], pos, colisao, &carta_sel[1], pares_quantidade,
                            num_carta_selec[0]);
-        }
-        if (num_carta_selec[1] != -1) {
-            DrawTextB(cartas_string[num_carta_selec[1]], pos_texto_tela[num_carta_selec[1]].x,
-                      pos_texto_tela[num_carta_selec[1]].y, 20, WHITE);
         }
         if (carta_sel[0]) {
             flag_primeira_selecao = true; //Flag necessário porque ao usar uma função do tipo que lê o estado do mouse, esse estado fica salvo até o fim do loop
         } else {
             flag_primeira_selecao = false;
         }
-        DrawTextB(tentativas_string, screenWidth - 200, screenHeight - 100, 20, BLACK);
-        DrawTextB(tempo, screenWidth - 60, 30, 20, BLACK);
+        BeginDrawing();
+        DrawTexture(background, 0, 0, WHITE);
+        for (i = 0; i < pares_quantidade * 2; i++) {
+            if (!flag_remover[i]) {
+                if (num_carta_selec[0] == i) {
+                    DrawTexture(card_front,pos_carta_tela[i].x,pos_carta_tela[i].y,WHITE);
+                    DrawTextB(cartas_string[i], pos_texto_tela[i].x, pos_texto_tela[i].y, 20, BLACK);
+                } else if (num_carta_selec[1] == i) {
+                    DrawTexture(card_front,pos_carta_tela[i].x,pos_carta_tela[i].y,WHITE);
+                    DrawTextB(cartas_string[i], pos_texto_tela[i].x, pos_texto_tela[i].y, 20, BLACK);
+                } else {
+                    DrawTexture(card_back, pos_carta_tela[i].x, pos_carta_tela[i].y, WHITE);
+                }
+            }
+        }
+        ChecaSelecao(cartas_objeto, mouse, colisao, pares_quantidade, flag_remover);
+        DrawTextB(tentativas_string, screenWidth - 200, screenHeight - 100, 20, WHITE);
+        DrawTextB(tempo, screenWidth - 60, 30, 20, WHITE);
         EndDrawing();
-        VerificaSePar(carta_id, carta_sel, num_carta_selec, flag_remover, &tentativas, &acertos);
     }
+
     *pontos = (timeout * 1000) / (tentativas - acertos);
 }
 
@@ -344,6 +350,12 @@ int main(void) {
 
     //Inicialização
     InitWindow(screenWidth, screenHeight, "MATENIGMA");
+    InitAudioDevice();
+    card_back = LoadTexture("resources/card_back.png");
+    card_front = LoadTexture("resources/card_front.png");
+    card_flip = LoadTexture("resources/card_flip.png");
+    background = LoadTexture("resources/finalNight.png");
+    musica_gameplay = LoadMusicStream("resources/ZeroRespect.wav");
     SetTargetFPS(60);
     mono = LoadFont("resources/Monocraft.otf"); // OBS: mudar parametro para resources/Monocraft.otf
     int i;
@@ -354,6 +366,7 @@ int main(void) {
     bool gameover_win[4] = {false, false, false, false};
     bool gameover_lose[4] = {false, false, false, false};
     Vector2 offset = {120, 120};
+    PlayMusicStream(musica_gameplay);
     GerarNivelJogo(pares_quantidade[0], tempo_total[0], &pontos[0], &gameover_win[0], &gameover_lose[0], offset);
     for (i = 1; i < 4; i++) {
         if (gameover_win[i - 1]) {
@@ -361,10 +374,15 @@ int main(void) {
                            offset);
         }
     }
-    pontos_total = pontos[0]*0.2+pontos[1]*0.35+pontos[2]*0.65+pontos[3]*1.5;
-    SaveFileData("resources/ponto_individual.bin",&pontos_total, sizeof(double ));
+    pontos_total = pontos[0] * 0.2 + pontos[1] * 0.35 + pontos[2] * 0.65 + pontos[3] * 1.5;
+    SaveFileData("resources/ponto_individual.bin", &pontos_total, sizeof(double));
     //Desinicialização
+    CloseAudioDevice();
     CloseWindow();
+    UnloadMusicStream(musica_gameplay);
     UnloadFont(mono);
+    UnloadTexture(background);
+    UnloadTexture(card_back);
+    UnloadTexture(card_front);
     return 0;
 }
