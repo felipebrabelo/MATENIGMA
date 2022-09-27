@@ -1,11 +1,6 @@
-//----------------------------------------------------------------------------------
-// Gameplay Screen Functions Definition
-//----------------------------------------------------------------------------------
-
-#include <stdio.h>
+//----------------#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "raylib.h"
 #include <time.h>
 
@@ -18,12 +13,12 @@ const int screenHeight = 720;
 Font mono;
 
 //Texturas
-Texture2D card_back, background, card_front, bg_pyramid, erros, clock_symb, bg_pyramid_win;
+Texture2D card_back, background, card_front, bg_pyramid, erros, clock_symb, bg_pyramid_win, game_complete;
 Texture2D idle, run, attack, miss, run, death;
 
 //Sons
 
-Music musica_gameplay;
+Music musica_gameplay, musica_complete;
 Sound card_flip_sound, victory_audio, gameover_audio;
 Sound attack_audio, miss_audio;
 //Struct que define o conteúdo das cartas
@@ -562,6 +557,41 @@ void GerarNivelJogo(int pares_quantidade, double tempo_total, double* pontos, do
     }
 }
 
+void TelaCompleta(double pontos_total)
+{
+    bool termina = false;
+    Timer relogio;
+    char pontos_string[30];
+    sprintf(pontos_string, "Pontos totais: %.0lf", pontos_total);
+    Vector2 offset_msg = MeasureTextEx(mono, "VITORIA!", 40, 1);
+    Vector2 offset_pontos = MeasureTextEx(mono, pontos_string, 30, 1);
+    Vector2 offset_enter = MeasureTextEx(mono, "Pressione ENTER para continuar.", 20, 1);
+    ComecaTimer(&relogio);
+    while (!WindowShouldClose() && !termina)
+    {
+        UpdateMusicStream(musica_complete);
+        VerificaTimer(&relogio);
+        if (relogio.atual > 5.0)
+        {
+            if (IsKeyPressed(KEY_ENTER))
+            {
+                termina = true;
+            }
+        }
+
+        //Drawing
+        BeginDrawing();
+        DrawTexture(game_complete, 0, 0, WHITE);
+        DrawTextB("VITORIA!", (screenWidth - offset_msg.x) / 2, 0, 40, WHITE);
+        DrawTextB(pontos_string, (screenWidth - offset_pontos.x) / 2, offset_msg.y, 30, WHITE);
+        if (relogio.atual > 5.0) {
+            DrawTextB("Pressione ENTER para continuar.", (screenWidth - offset_enter.x) / 2,
+                offset_msg.y + offset_pontos.y, 20, LIGHTGRAY);
+        }
+        EndDrawing();
+    }
+
+}
 int gameplay(void) {
 
     //Inicialização
@@ -579,7 +609,9 @@ int gameplay(void) {
     erros = LoadTexture("resources/erros.png");
     clock_symb = LoadTexture("resources/clock.png");
     bg_pyramid_win = LoadTexture("resources/bg_pyramid_win.png");
+    game_complete = LoadTexture("resources/game_complete.png");
     musica_gameplay = LoadMusicStream("resources/ZeroRespect.wav");
+    musica_complete = LoadMusicStream("resources/Sunstrider.wav");
     card_flip_sound = LoadSound("resources/cardflip.mp3");
     attack_audio = LoadSound("resources/attack.wav");
     miss_audio = LoadSound("resources/damaged.wav");
@@ -587,12 +619,13 @@ int gameplay(void) {
     gameover_audio = LoadSound("resources/FallenInBattle.wav");
     mono = LoadFont("resources/Monocraft.otf");
     SetTargetFPS(60);
-    SetMusicVolume(musica_gameplay, 0.3);
+    SetMusicVolume(musica_gameplay, 0.3f);
+    SetMusicVolume(musica_complete, 0.5f);
     int i;
     int pares_quantidade[4] = { 6, 8, 10, 12 };
-    double tempo_total[4] = { 300, 250, 200, 150 };
+    double tempo_total[4] = { 150, 200, 250, 300 };
     double pontos[4] = { 0, 0, 0, 0 };
-    double pontos_peso[4] = { 0.2, 0.35, 0.65, 1.5 };
+    double pontos_peso[4] = { 0.2, 0.75, 1, 1.45 };
     double pontos_total;
     bool gameover_win[4] = { false, false, false, false };
     bool gameover_lose[4] = { false, false, false, false };
@@ -607,7 +640,13 @@ int gameplay(void) {
                 offset);
         }
     }
-    pontos_total = pontos[0] + pontos[1] + pontos[2] + pontos[3];
+    StopMusicStream(musica_gameplay);
+    PlayMusicStream(musica_complete);
+    pontos_total = pontos[0] + pontos[1] + pontos[2] + pontos[3] + (gameover_win[3] ? 5000 : 0);
+    if (gameover_win[3])
+    {
+        TelaCompleta(pontos_total);
+    }
     SaveFileData("resources/ponto_individual.bin", &pontos_total, sizeof(double));
     //Desinicialização
     //CloseAudioDevice();
@@ -624,7 +663,9 @@ int gameplay(void) {
     UnloadTexture(erros);
     UnloadTexture(clock_symb);
     UnloadTexture(bg_pyramid_win);
+    UnloadTexture(game_complete);
     UnloadMusicStream(musica_gameplay);
+    UnloadMusicStream(musica_complete);
     UnloadSound(card_flip_sound);
     UnloadSound(attack_audio);
     UnloadSound(miss_audio);

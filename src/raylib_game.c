@@ -247,7 +247,7 @@ static void UpdateDrawFrame(void)
                 UpdateTitleScreen();
 
                 if (FinishTitleScreen() == 1) TransitionToScreen(GAMEPLAY);
-                else if (FinishTitleScreen() == 2) TransitionToScreen(GAMEPLAY);
+                //else if (FinishTitleScreen() == 2) TransitionToScreen(GAMEPLAY);
 
             } break;
             case MENU:
@@ -266,8 +266,6 @@ static void UpdateDrawFrame(void)
             } break;
             case GAMEPLAY:
             {
-                gameplay();
-
                 if (gameplay() == 0) TransitionToScreen(NAME);
                 //else if (FinishGameplayScreen() == 2) TransitionToScreen(TITLE);
 

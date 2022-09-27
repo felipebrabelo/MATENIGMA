@@ -31,9 +31,10 @@
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
 //----------------------------------------------------------------------------------
-static int framesCounter = 0;
-static int finishScreen = 0;
-
+static int framesCounter;
+static int finishScreen;
+int letterCount;
+int framesCounter;
 //----------------------------------------------------------------------------------
 // Title Screen Functions Definition
 //----------------------------------------------------------------------------------
@@ -44,6 +45,8 @@ void InitNameScreen(void)
     // TODO: Initialize TITLE screen variables here!
     framesCounter = 0;
     finishScreen = 0;
+    letterCount = 0;
+    framesCounter = 0;
 }
 
 // Title Screen Update logic
@@ -55,7 +58,6 @@ void UpdateNameScreen(void)
         finishScreen = 1;   // ENDING
         PlaySound(fxCoin);
     }
-    // Press enter or tap to change to GAMEPLAY screen
     
 }
 
@@ -65,18 +67,12 @@ void DrawNameScreen(void)
     const int screenWidth = 1280;
     const int screenHeight = 720;
 
-    char name[MAX_INPUT_CHARS + 1] = "\0";      // NOTE: One extra space required for null terminator char '\0'
-    int letterCount = 0;
+    char name[MAX_INPUT_CHARS + 1] = "\0";  
 
     Rectangle textBox = { screenWidth / 2.0f - 100, screenHeight/2-25, 500, 60 };
     bool mouseOnText = false;
 
-    int framesCounter = 0;
 
-    //SetTargetFPS(10);               // Set our game to run at 10 frames-per-second
-    //--------------------------------------------------------------------------------------
-
-    // Main game loop
     // Update
     //----------------------------------------------------------------------------------
     if (CheckCollisionPointRec(GetMousePosition(), textBox)) mouseOnText = true;
@@ -128,7 +124,7 @@ void DrawNameScreen(void)
     if (mouseOnText) DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, RED);
     else DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
 
-    DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
+    //DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
 
     DrawText(TextFormat("Digite seu Nome: %i/%i", letterCount, MAX_INPUT_CHARS), screenWidth/2-500, screenHeight/2, 30, DARKGRAY);
 
@@ -137,19 +133,14 @@ void DrawNameScreen(void)
         if (letterCount < MAX_INPUT_CHARS)
         {
             // Draw blinking underscore char
-            if (((framesCounter / 200) % 2) == 0) DrawText("_", (int)textBox.x + 8 + MeasureText(name, 40), (int)textBox.y + 12, 40, MAROON);
+            DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
+            DrawText("_", (int)textBox.x + 8 + MeasureText(name, 40), (int)textBox.y + 12, 40, MAROON);
         }
         else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
     }
 
     //----------------------------------------------------------------------------------
     
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    //CloseWindow();        // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
-
 }
 
 // Title Screen Unload logic
