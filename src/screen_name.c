@@ -27,14 +27,13 @@
 #include "screens.h"
 #include "stdio.h"
 #define MAX_INPUT_CHARS     20
-
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
 //----------------------------------------------------------------------------------
-static int framesCounter;
-static int finishScreen;
-int letterCount;
-int framesCounter;
+static int framesCounter = 0;
+static int finishScreen = 0;
+int letterCount = 0;
+char name[MAX_INPUT_CHARS + 1] = "\0";
 //----------------------------------------------------------------------------------
 // Title Screen Functions Definition
 //----------------------------------------------------------------------------------
@@ -45,20 +44,19 @@ void InitNameScreen(void)
     // TODO: Initialize TITLE screen variables here!
     framesCounter = 0;
     finishScreen = 0;
-    letterCount = 0;
-    framesCounter = 0;
 }
 
 // Title Screen Update logic
 void UpdateNameScreen(void)
 {
     // TODO: Update TITLE screen variables here!
+
+    // Press enter or tap to change to GAMEPLAY screen
     if (IsKeyPressed(KEY_ENTER))
     {
         finishScreen = 1;   // ENDING
         PlaySound(fxCoin);
     }
-    
 }
 
 // Title Screen Draw logic
@@ -67,9 +65,7 @@ void DrawNameScreen(void)
     const int screenWidth = 1280;
     const int screenHeight = 720;
 
-    char name[MAX_INPUT_CHARS + 1] = "\0";  
-
-    Rectangle textBox = { screenWidth / 2.0f - 100, screenHeight/2-25, 500, 60 };
+    Rectangle textBox = { screenWidth / 2.0f - 100, screenHeight / 2 - 25, 500, 60 };
     bool mouseOnText = false;
 
 
@@ -111,36 +107,30 @@ void DrawNameScreen(void)
 
     if (mouseOnText) framesCounter++;
     else framesCounter = 0;
-    //----------------------------------------------------------------------------------
 
     // Draw
-    //----------------------------------------------------------------------------------
 
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), WHITE);
+    ClearBackground(RAYWHITE);
 
-    DrawText("FIM DE JOGO", screenWidth/2-200, screenHeight/2-200, 50,BLACK);
-    DrawText(TextFormat("Sua pontuacao foi de: x pontos"),screenWidth / 2 - 300, screenHeight / 2-100, 40, GRAY);
+    DrawText("FIM DE JOGO", screenWidth / 2 - 200, screenHeight / 2 - 200, 50, BLACK);
+    DrawText(TextFormat("Sua pontuacao foi de: x pontos"), screenWidth / 2 - 300, screenHeight / 2 - 100, 40, GRAY);
     DrawRectangleRec(textBox, LIGHTGRAY);
     if (mouseOnText) DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, RED);
     else DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
 
-    //DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
+    DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
 
-    DrawText(TextFormat("Digite seu Nome: %i/%i", letterCount, MAX_INPUT_CHARS), screenWidth/2-500, screenHeight/2, 30, DARKGRAY);
+    DrawText(TextFormat("Digite seu Nome: %i/%i", letterCount, MAX_INPUT_CHARS), screenWidth / 2 - 500, screenHeight / 2, 30, DARKGRAY);
 
     if (mouseOnText)
     {
         if (letterCount < MAX_INPUT_CHARS)
         {
             // Draw blinking underscore char
-            DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
-            DrawText("_", (int)textBox.x + 8 + MeasureText(name, 40), (int)textBox.y + 12, 40, MAROON);
+            if (((framesCounter / 20) % 2) == 0) DrawText("_", (int)textBox.x + 8 + MeasureText(name, 40), (int)textBox.y + 12, 40, MAROON);
         }
         else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
     }
-
-    //----------------------------------------------------------------------------------
-    
 }
 
 // Title Screen Unload logic
