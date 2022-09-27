@@ -14,12 +14,14 @@ const int screenHeight = 720;
 Font mono;
 
 //Texturas
-Texture2D card_back, background, card_front,card_flip;
+Texture2D card_back, background, card_front, bg_pyramid, erros, clock_symb, bg_pyramid_win;
+Texture2D idle, run, attack, miss, run, death;
 
 //Sons
 
 Music musica_gameplay;
-
+Sound card_flip_sound, victory_audio, gameover_audio;
+Sound attack_audio, miss_audio;
 //Struct que define o conteúdo das cartas
 typedef struct {
     int valor1, valor2;
@@ -196,6 +198,8 @@ void SelecionaCarta(int *idcarta, int *num_carta_selec, const Posicao *pos, cons
             if (*num_carta_selec == num_cara_selec_ant) {
                 *select = false;
                 *num_carta_selec = -1;
+            } else {
+                PlaySound(card_flip_sound);
             }
         }
     }
@@ -211,13 +215,16 @@ void EsperaSegundos(double segundos) {
 
 
 void VerificaSePar(const int *carta_id, bool *carta_sel, int *num_carta_selec, bool *flag_remover, int *tentativas,
-                   int *acertos) {
+                   int *acertos, int *tipo_anim) {
 
     if (carta_sel[0] && carta_sel[1]) {
         if (carta_id[0] == carta_id[1]) {
             flag_remover[num_carta_selec[0]] = true;
             flag_remover[num_carta_selec[1]] = true;
             *acertos = *acertos + 1;
+            *tipo_anim = 1;
+        } else {
+            *tipo_anim = 2;
         }
         num_carta_selec[0] = -1;
         num_carta_selec[1] = -1;
@@ -229,14 +236,161 @@ void VerificaSePar(const int *carta_id, bool *carta_sel, int *num_carta_selec, b
 
 }
 
-void AnimarFlip(int dir,Vector2 *pos_carta_tela)
-{
-    if(dir == 1)
-    {
+void ControleAnimacao(int *framesCounter, int *framesSpeed, int *currentFrame, Rectangle *frameRec, int *tipo) {
+
+    if (*tipo == 0) {
+        if (*currentFrame > 3) {
+            *currentFrame = 0;
+            frameRec->x =0.0f;
+        }
+        frameRec->width = (float) idle.width / 4;
+        *framesCounter = *framesCounter + 1;
+        *framesSpeed = 5;
+        if (*framesCounter >= (60 / *framesSpeed)) {
+            *framesCounter = 0;
+            *currentFrame = *currentFrame + 1;
+            frameRec->x = (float) *currentFrame * (float) idle.width / 4;
+        }
+    } else if (*tipo == 1) {
+        if (*currentFrame < 4 || *currentFrame > 9) {
+            *currentFrame = 4;
+            frameRec->x =0.0f;
+        }
+        frameRec->width = (float) attack.width / 6;
+        *framesCounter = *framesCounter + 1;
+        *framesSpeed = 8;
+        if (*framesCounter >= (60 / *framesSpeed)) {
+            *framesCounter = 0;
+            *currentFrame = *currentFrame + 1;
+            frameRec->x = (float) (*currentFrame - 4) * (float) attack.width / 6;
+            if (frameRec->x == attack.width) {
+                PlaySound(attack_audio);
+                *tipo = 0;
+            }
+        }
+    } else if (*tipo == 2) {
+        if (*currentFrame < 10 || *currentFrame > 12) {
+            *currentFrame = 10;
+            frameRec->x =0.0f;
+        }
+        frameRec->width = (float) miss.width / 3;
+        *framesCounter = *framesCounter + 1;
+        *framesSpeed = 6;
+        if (*framesCounter >= (60 / *framesSpeed)) {
+            *framesCounter = 0;
+            *currentFrame = *currentFrame + 1;
+            frameRec->x = (float) (*currentFrame - 10) * (float) miss.width / 3;
+            if (frameRec->x == miss.width) {
+                PlaySound(miss_audio);
+                *tipo = 0;
+            }
+        }
+    } else if (*tipo == 3) {
+        if (*currentFrame < 13 || *currentFrame > 18) {
+            *currentFrame = 13;
+            frameRec->x =0.0f;
+        }
+        frameRec->width = (float) run.width / 6;
+        *framesCounter = *framesCounter + 1;
+        *framesSpeed = 8;
+        if (*framesCounter >= (60 / *framesSpeed)) {
+            *framesCounter = 0;
+            *currentFrame = *currentFrame + 1;
+            frameRec->x = (float) (*currentFrame - 13) * (float) run.width / 6;
+        }
+    } else if (*tipo == 4) {
+        if (*currentFrame < 19) {
+            *currentFrame = 19;
+            frameRec->x =0.0f;
+        }
+        frameRec->width = (float) death.width / 6;
+        *framesCounter = *framesCounter + 1;
+        *framesSpeed = 2;
+        if (*framesCounter >= (60 / *framesSpeed)) {
+            *framesCounter = 0;
+            *currentFrame = *currentFrame + 1;
+            if (*currentFrame < 25) {
+                frameRec->x = (float) (*currentFrame - 19) * (float) death.width / 6;
+            }
+        }
+    }
+}
+
+
+void TelaVitoria(int *framesCounter, int *framesSpeed, int *currentFrame, Rectangle *frameRec, Vector2 *position_anim,
+                 double pontos) {
+    Timer relogio;
+    int tipo = 3;
+    char pontos_string[40];
+    sprintf(pontos_string, "Pontos da Fase: %.0lf", pontos);
+    Vector2 offset_win = MeasureTextEx(mono, "FASE CONCLUIDA", 50, 1);
+    Vector2 offset_pontos = MeasureTextEx(mono, pontos_string, 35, 1);
+    Vector2 offset_enter = MeasureTextEx(mono, "Pressione ENTER para continuar.", 20, 1);
+    bool termina = false;
+    ComecaTimer(&relogio);
+    PlaySound(victory_audio);
+    while (!WindowShouldClose() && !termina) {
+        VerificaTimer(&relogio);
+        ControleAnimacao(framesCounter, framesSpeed, currentFrame, frameRec, &tipo);
+        if (position_anim->x < (float) screenWidth) {
+            position_anim->x += 5.0f;
+        }
+        if (relogio.atual > 5.0) {
+            if (IsKeyPressed(KEY_ENTER)) {
+                termina = true;
+            }
+        }
+
+        //Drawing
+
+        BeginDrawing();
+        DrawTexture(background, 0, 0, WHITE);
+        DrawTexture(bg_pyramid_win, 0, 0, GOLD);
+        DrawTextB("FASE CONCLUIDA", screenWidth / 2 - offset_win.x / 2, 100, 50, WHITE);
+        DrawTextB(pontos_string, (screenWidth - offset_pontos.x) / 2, 110 + offset_win.y, 35, WHITE);
+        if (relogio.atual > 5.0) {
+            DrawTextB("Pressione ENTER para continuar.", (screenWidth - offset_enter.x) / 2,
+                      110 + offset_win.y + offset_pontos.y, 20, LIGHTGRAY);
+        }
+        DrawTextureRec(run, *frameRec, *position_anim, WHITE);
+        EndDrawing();
+    }
+}
+
+void TelaDerrota(int *framesCounter, int *framesSpeed, int *currentFrame, Rectangle *frameRec, Vector2 *position_anim) {
+    Timer relogio;
+    bool termina = false;
+    int tipo = 4;
+    Vector2 offset_lose = MeasureTextEx(mono, "GAME OVER", 70, 1);
+    Vector2 offset_enter = MeasureTextEx(mono, "Pressione ENTER para continuar.", 20, 1);
+    ComecaTimer(&relogio);
+    PlaySound(gameover_audio);
+    while (!WindowShouldClose() && !termina) {
+        VerificaTimer(&relogio);
+        ControleAnimacao(framesCounter, framesSpeed, currentFrame, frameRec, &tipo);
+        if (relogio.atual > 10.0) {
+            if (IsKeyPressed(KEY_ENTER)) {
+                termina = true;
+            }
+        }
+
+        //Drawing
+        BeginDrawing();
+        DrawTexture(background, 0, 0, WHITE);
+        DrawTexture(bg_pyramid, 0, 0, GOLD);
+        DrawTextB("GAME OVER", (screenWidth - offset_lose.x) / 2, 100, 70, WHITE);
+        if (relogio.atual > 10.0) {
+            DrawTextB("Pressione ENTER para continuar.", (screenWidth - offset_enter.x) / 2,
+                      110 + offset_lose.y, 20, LIGHTGRAY);
+        }
+        DrawTextureRec(death, *frameRec, *position_anim, WHITE);
+        EndDrawing();
 
     }
 }
-void GerarNivelJogo(int pares_quantidade, double tempo_total, double *pontos, bool *gameover_win, bool *gameover_lose,
+
+void GerarNivelJogo(int pares_quantidade, double tempo_total, double *pontos, double pontos_peso, bool *gameover_win,
+                    bool *gameover_lose,
                     Vector2 offset) {
     int tentativas = 0, acertos = 0;
     Timer relogio;
@@ -288,62 +442,98 @@ void GerarNivelJogo(int pares_quantidade, double tempo_total, double *pontos, bo
     int carta_id[2] = {-1, -1};
     int num_carta_selec[2] = {-1, -1};
     bool flag_primeira_selecao = false;
+
+    //
+    Rectangle frameRec = {0.0f, 0.0f, (float) idle.width / 4, (float) idle.height};
+    int currentFrame = 0;
+    int framesCounter = 0;
+    int framesSpeed = 5;
+    Vector2 position_anim = {(float) 256 / 2, (float) (462 - idle.height)};
+    int tipo_anim = 0; // 0 - animacao padrao, 1 - animacao ataque, 2 - animacao erro, 3 - animacao correr
+
+    //
     ComecaTimer(&relogio);
 
     while (!WindowShouldClose() && !*gameover_win && !*gameover_lose) {
 
+        //Animacao
+
+        ControleAnimacao(&framesCounter, &framesSpeed, &currentFrame, &frameRec, &tipo_anim);
         //Update to retangulo que segue o mouse
+
         UpdateMusicStream(musica_gameplay);
-        mouse.x = GetMouseX();
-        mouse.y = GetMouseY();
-        sprintf(tentativas_string, "Tentativas: %i", tentativas);
+        mouse.x = (float) GetMouseX();
+        mouse.y = (float) GetMouseY();
+        sprintf(tentativas_string, "x %i", tentativas - acertos);
         VerificaTimer(&relogio);
         timeout = tempo_total - relogio.atual;
         sprintf(tempo, "%.0lf", timeout);
 
-        if (acertos >= pares_quantidade) {
-            EsperaSegundos(5);
+        if (acertos >= pares_quantidade && tipo_anim == 0) {
             *gameover_win = true;
-        }
-        if (timeout < 0) {
-            EsperaSegundos(5);
+        } else if (timeout < 0 && tipo_anim == 0) {
             *gameover_lose = true;
-        }
-        VerificaSePar(carta_id, carta_sel, num_carta_selec, flag_remover, &tentativas, &acertos);
-        if (!carta_sel[0]) {
-            SelecionaCarta(&carta_id[0], &num_carta_selec[0], pos, colisao, &carta_sel[0], pares_quantidade, -1);
-        }
-        if (flag_primeira_selecao) {
-            SelecionaCarta(&carta_id[1], &num_carta_selec[1], pos, colisao, &carta_sel[1], pares_quantidade,
-                           num_carta_selec[0]);
-        }
-        if (carta_sel[0]) {
-            flag_primeira_selecao = true; //Flag necessário porque ao usar uma função do tipo que lê o estado do mouse, esse estado fica salvo até o fim do loop
         } else {
-            flag_primeira_selecao = false;
-        }
-        BeginDrawing();
-        DrawTexture(background, 0, 0, WHITE);
-        for (i = 0; i < pares_quantidade * 2; i++) {
-            if (!flag_remover[i]) {
-                if (num_carta_selec[0] == i) {
-                    DrawTexture(card_front,pos_carta_tela[i].x,pos_carta_tela[i].y,WHITE);
-                    DrawTextB(cartas_string[i], pos_texto_tela[i].x, pos_texto_tela[i].y, 20, BLACK);
-                } else if (num_carta_selec[1] == i) {
-                    DrawTexture(card_front,pos_carta_tela[i].x,pos_carta_tela[i].y,WHITE);
-                    DrawTextB(cartas_string[i], pos_texto_tela[i].x, pos_texto_tela[i].y, 20, BLACK);
-                } else {
-                    DrawTexture(card_back, pos_carta_tela[i].x, pos_carta_tela[i].y, WHITE);
+            VerificaSePar(carta_id, carta_sel, num_carta_selec, flag_remover, &tentativas, &acertos, &tipo_anim);
+            if (!carta_sel[0]) {
+                SelecionaCarta(&carta_id[0], &num_carta_selec[0], pos, colisao, &carta_sel[0], pares_quantidade,
+                               -1);
+            }
+            if (flag_primeira_selecao) {
+                SelecionaCarta(&carta_id[1], &num_carta_selec[1], pos, colisao, &carta_sel[1], pares_quantidade,
+                               num_carta_selec[0]);
+            }
+            if (carta_sel[0]) {
+                flag_primeira_selecao = true; //Flag necessário porque ao usar uma função do tipo que lê o estado do mouse, esse estado fica salvo até o fim do loop
+            } else {
+                flag_primeira_selecao = false;
+            }
+
+            //Drawing---------------
+            BeginDrawing();
+            DrawTexture(background, 0, 0, WHITE);
+            DrawTexture(bg_pyramid, 0, 0, GOLD);
+            DrawTexture(erros, 15, 100, WHITE);
+            DrawTexture(clock_symb, 15, 10, WHITE);
+            if (timeout <= tempo_total * 0.1) {
+                DrawTextB(tempo, 20 + clock_symb.width, 30, 20, RED);
+            } else {
+                DrawTextB(tempo, 20 + clock_symb.width, 30, 20, WHITE);
+            }
+
+            DrawTextB(tentativas_string, 20 + erros.width, 115, 20, WHITE);
+            if (tipo_anim == 0) {
+                DrawTextureRec(idle, frameRec, position_anim, WHITE);
+            } else if (tipo_anim == 1) {
+                DrawTextureRec(attack, frameRec, position_anim, WHITE);
+            } else if (tipo_anim == 2) {
+                DrawTextureRec(miss, frameRec, position_anim, WHITE);
+            }
+
+            for (i = 0; i < pares_quantidade * 2; i++) {
+                if (!flag_remover[i]) {
+                    if (num_carta_selec[0] == i) {
+                        DrawTexture(card_front, pos_carta_tela[i].x, pos_carta_tela[i].y, WHITE);
+                        DrawTextB(cartas_string[i], pos_texto_tela[i].x, pos_texto_tela[i].y, 20, BLACK);
+                    } else if (num_carta_selec[1] == i) {
+                        DrawTexture(card_front, pos_carta_tela[i].x, pos_carta_tela[i].y, WHITE);
+                        DrawTextB(cartas_string[i], pos_texto_tela[i].x, pos_texto_tela[i].y, 20, BLACK);
+                    } else {
+                        DrawTexture(card_back, pos_carta_tela[i].x, pos_carta_tela[i].y, WHITE);
+                    }
                 }
             }
-        }
-        ChecaSelecao(cartas_objeto, mouse, colisao, pares_quantidade, flag_remover);
-        DrawTextB(tentativas_string, screenWidth - 200, screenHeight - 100, 20, WHITE);
-        DrawTextB(tempo, screenWidth - 60, 30, 20, WHITE);
-        EndDrawing();
-    }
+            ChecaSelecao(cartas_objeto, mouse, colisao, pares_quantidade, flag_remover);
 
-    *pontos = (timeout * 1000) / (tentativas - acertos);
+            EndDrawing();
+        }
+    }
+    *pontos = pontos_peso * (timeout * 1000) / (tentativas - acertos);
+    if (*gameover_win) {
+        TelaVitoria(&framesCounter, &framesSpeed, &currentFrame, &frameRec, &position_anim, *pontos);
+    } else if (*gameover_lose) {
+        TelaDerrota(&framesCounter, &framesSpeed, &currentFrame, &frameRec, &position_anim);
+    }
 }
 
 int main(void) {
@@ -353,36 +543,67 @@ int main(void) {
     InitAudioDevice();
     card_back = LoadTexture("resources/card_back.png");
     card_front = LoadTexture("resources/card_front.png");
-    card_flip = LoadTexture("resources/card_flip.png");
+    bg_pyramid = LoadTexture("resources/bg_character.png");
     background = LoadTexture("resources/finalNight.png");
+    idle = LoadTexture("resources/idle.png");
+    run = LoadTexture("resources/run.png");
+    attack = LoadTexture("resources/attack.png");
+    miss = LoadTexture("resources/miss.png");
+    death = LoadTexture("resources/death.png");
+    erros = LoadTexture("resources/erros.png");
+    clock_symb = LoadTexture("resources/clock.png");
+    bg_pyramid_win = LoadTexture("resources/bg_pyramid_win.png");
     musica_gameplay = LoadMusicStream("resources/ZeroRespect.wav");
+    card_flip_sound = LoadSound("resources/cardflip.mp3");
+    attack_audio = LoadSound("resources/attack.wav");
+    miss_audio = LoadSound("resources/damaged.wav");
+    victory_audio = LoadSound("resources/MissionOver.wav");
+    gameover_audio = LoadSound("resources/FallenInBattle.wav");
+    mono = LoadFont("resources/Monocraft.otf");
     SetTargetFPS(60);
-    mono = LoadFont("resources/Monocraft.otf"); // OBS: mudar parametro para resources/Monocraft.otf
+    SetMusicVolume(musica_gameplay, 0.3);
     int i;
     int pares_quantidade[4] = {6, 8, 10, 12};
     double tempo_total[4] = {300, 250, 200, 150};
     double pontos[4] = {0, 0, 0, 0};
+    double pontos_peso[4] = {0.2, 0.35, 0.65, 1.5};
     double pontos_total;
     bool gameover_win[4] = {false, false, false, false};
     bool gameover_lose[4] = {false, false, false, false};
-    Vector2 offset = {120, 120};
+    Vector2 offset = {120 + 256, 120};
     PlayMusicStream(musica_gameplay);
-    GerarNivelJogo(pares_quantidade[0], tempo_total[0], &pontos[0], &gameover_win[0], &gameover_lose[0], offset);
+    GerarNivelJogo(pares_quantidade[0], tempo_total[0], &pontos[0], pontos_peso[0], &gameover_win[0], &gameover_lose[0],
+                   offset);
     for (i = 1; i < 4; i++) {
         if (gameover_win[i - 1]) {
-            GerarNivelJogo(pares_quantidade[i], tempo_total[i], &pontos[i], &gameover_win[i], &gameover_lose[i],
+            GerarNivelJogo(pares_quantidade[i], tempo_total[i], &pontos[i], pontos_peso[i], &gameover_win[i],
+                           &gameover_lose[i],
                            offset);
         }
     }
-    pontos_total = pontos[0] * 0.2 + pontos[1] * 0.35 + pontos[2] * 0.65 + pontos[3] * 1.5;
+    pontos_total = pontos[0] + pontos[1] + pontos[2] + pontos[3];
     SaveFileData("resources/ponto_individual.bin", &pontos_total, sizeof(double));
     //Desinicialização
     CloseAudioDevice();
     CloseWindow();
-    UnloadMusicStream(musica_gameplay);
-    UnloadFont(mono);
-    UnloadTexture(background);
     UnloadTexture(card_back);
     UnloadTexture(card_front);
+    UnloadTexture(bg_pyramid);
+    UnloadTexture(background);
+    UnloadTexture(idle);
+    UnloadTexture(run);
+    UnloadTexture(attack);
+    UnloadTexture(miss);
+    UnloadTexture(death);
+    UnloadTexture(erros);
+    UnloadTexture(clock_symb);
+    UnloadTexture(bg_pyramid_win);
+    UnloadMusicStream(musica_gameplay);
+    UnloadSound(card_flip_sound);
+    UnloadSound(attack_audio);
+    UnloadSound(miss_audio);
+    UnloadSound(victory_audio);
+    UnloadSound(gameover_audio);
+    UnloadFont(mono);
     return 0;
 }
