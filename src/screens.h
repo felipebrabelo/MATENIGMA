@@ -29,7 +29,7 @@
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
-typedef enum GameScreen { LOGO = 0, TITLE, OPTIONS, MENU, GAMEPLAY, ENDING } GameScreen;
+typedef enum GameScreen { LOGO = 0, TITLE, OPTIONS, MENU, GAMEPLAY, NAME, ENDING } GameScreen;
 
 //----------------------------------------------------------------------------------
 // Global Variables Declaration (shared by several modules)
@@ -87,6 +87,15 @@ void UpdateGameplayScreen(void);
 void DrawGameplayScreen(void);
 void UnloadGameplayScreen(void);
 int FinishGameplayScreen(void);
+
+//----------------------------------------------------------------------------------
+// Ending Screen Functions Declaration
+//----------------------------------------------------------------------------------
+void InitNameScreen(void);
+void UpdateNameScreen(void);
+void DrawNameScreen(void);
+void UnloadNameScreen(void);
+int FinishNameScreen(void);
 
 //----------------------------------------------------------------------------------
 // Ending Screen Functions Declaration

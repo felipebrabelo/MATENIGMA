@@ -98,6 +98,7 @@ int main(void)
         case LOGO: UnloadLogoScreen(); break;
         case TITLE: UnloadTitleScreen(); break;
         case MENU: UnloadMenuScreen(); break;;
+        case NAME: UnloadNameScreen(); break;
         case OPTIONS: UnloadOptionsScreen(); break;
         case GAMEPLAY: UnloadGameplayScreen(); break;
         case ENDING: UnloadEndingScreen(); break;
@@ -131,6 +132,7 @@ static void ChangeToScreen(int screen)
         case MENU: UnloadMenuScreen(); break;
         case OPTIONS: UnloadOptionsScreen(); break;
         case GAMEPLAY: UnloadGameplayScreen(); break;
+        case NAME: UnloadNameScreen(); break;
         case ENDING: UnloadEndingScreen(); break;
         default: break;
     }
@@ -143,6 +145,7 @@ static void ChangeToScreen(int screen)
         case MENU: InitMenuScreen(); break;
         case OPTIONS: InitOptionsScreen(); break;
         case GAMEPLAY: InitGameplayScreen(); break;
+        case NAME: InitNameScreen(); break;
         case ENDING: InitEndingScreen(); break;
         default: break;
     }
@@ -181,6 +184,7 @@ static void UpdateTransition(void)
                 case MENU: UnloadMenuScreen(); break;
                 case OPTIONS: UnloadOptionsScreen(); break;
                 case GAMEPLAY: UnloadGameplayScreen(); break;
+                case NAME: UnloadNameScreen(); break;
                 case ENDING: UnloadEndingScreen(); break;
                 default: break;
             }
@@ -192,6 +196,7 @@ static void UpdateTransition(void)
                 case TITLE: InitTitleScreen(); break;
                 case MENU: InitMenuScreen(); break;
                 case OPTIONS: InitOptionsScreen(); break;
+                case NAME: InitNameScreen(); break;
                 case GAMEPLAY: InitGameplayScreen(); break;
                 case ENDING: InitEndingScreen(); break;
                 default: break;
@@ -239,22 +244,22 @@ static void UpdateDrawFrame(void)
             {
                 UpdateLogoScreen();
 
-                if (FinishLogoScreen()) TransitionToScreen(TITLE);
+                if (FinishLogoScreen()) TransitionToScreen(MENU);
 
             } break;
             case TITLE:
             {
                 UpdateTitleScreen();
 
-                if (FinishTitleScreen() == 1) TransitionToScreen(MENU);
-                else if (FinishTitleScreen() == 2) TransitionToScreen(MENU);
+                if (FinishTitleScreen() == 1) TransitionToScreen(GAMEPLAY);
+                else if (FinishTitleScreen() == 2) TransitionToScreen(GAMEPLAY);
 
             } break;
             case MENU:
             {
                 UpdateMenuScreen();
 
-                if (FinishMenuScreen() == 1) TransitionToScreen(GAMEPLAY);
+                if (FinishMenuScreen() == 1) TransitionToScreen(TITLE);
                 else if (FinishMenuScreen() == 2) TransitionToScreen(OPTIONS);
             } break;
             case OPTIONS:
@@ -268,7 +273,15 @@ static void UpdateDrawFrame(void)
             {
                 UpdateGameplayScreen();
 
-                if (FinishGameplayScreen() == 1) TransitionToScreen(ENDING);
+                if (FinishGameplayScreen() == 1) TransitionToScreen(NAME);
+                //else if (FinishGameplayScreen() == 2) TransitionToScreen(TITLE);
+
+            } break;
+            case NAME:
+            {
+                UpdateNameScreen();
+
+                if (FinishNameScreen() == 1) TransitionToScreen(ENDING);
                 //else if (FinishGameplayScreen() == 2) TransitionToScreen(TITLE);
 
             } break;
@@ -276,7 +289,7 @@ static void UpdateDrawFrame(void)
             {
                 UpdateEndingScreen();
 
-                if (FinishEndingScreen() == 1) TransitionToScreen(TITLE);
+                if (FinishEndingScreen() == 1) TransitionToScreen(MENU);
 
             } break;
             default: break;
@@ -298,6 +311,7 @@ static void UpdateDrawFrame(void)
             case MENU: DrawMenuScreen(); break;
             case OPTIONS: DrawOptionsScreen(); break;
             case GAMEPLAY: DrawGameplayScreen(); break;
+            case NAME: DrawNameScreen(); break;
             case ENDING: DrawEndingScreen(); break;
             default: break;
         }

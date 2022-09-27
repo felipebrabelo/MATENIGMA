@@ -31,7 +31,7 @@
 //----------------------------------------------------------------------------------
 static int framesCounter = 0;
 static int finishScreen = 0;
-
+Texture2D Background;
 //----------------------------------------------------------------------------------
 // Title Screen Functions Definition
 //----------------------------------------------------------------------------------
@@ -42,6 +42,7 @@ void InitMenuScreen(void)
     // TODO: Initialize TITLE screen variables here!
     framesCounter = 0;
     finishScreen = 0;
+    Background = LoadTexture("backgroundsand-min.png");
 }
 
 // Title Screen Update logic
@@ -97,7 +98,15 @@ void DrawMenuScreen(void)
     }
     else button_instru_state = 1;
 
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), YELLOW);
+ //   DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), YELLOW);
+    int BackgroundX = 0;
+    int BackgroundY = 0;
+    Vector2 BackgroundPosition = { BackgroundX, BackgroundY };
+ 
+    Rectangle BackgroundFrameRec = { 0.0f,0.0f, (float)Background.width, (float) Background.height };
+    DrawTextureRec(Background, BackgroundFrameRec, BackgroundPosition, WHITE);
+
+
     if (button_game_state == 1)     DrawRectangle((1280 / 2) - 80, 300, button_width, button_height, RED);
     else if (button_game_state == 2) DrawRectangle((1280 / 2) - 80, 300, button_width, button_height, GREEN);
 
@@ -107,7 +116,7 @@ void DrawMenuScreen(void)
     DrawTextEx(font, "MENU SCREEN", (Vector2){ 20, 10 }, font.baseSize*3.0f, 4, DARKGREEN);
     DrawText("INICIAR", (1280 / 2) - 66, 328, 40, BLACK);
     DrawText("DICAS", (1280 / 2) - 64, 438, 40, BLACK);
-    DrawText("PRESS ENTER or TAP to JUMP to GAMEPLAY SCREEN", 120, 220, 20, DARKGREEN);
+
 }
 
 // Title Screen Unload logic

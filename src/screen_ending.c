@@ -61,9 +61,9 @@ void UpdateEndingScreen(void)
 void DrawEndingScreen(void)
 {
     // TODO: Draw ENDING screen here!
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLUE);
-    DrawTextEx(font, "ENDING SCREEN", (Vector2){ 20, 10 }, font.baseSize*3.0f, 4, DARKBLUE);
-    DrawText("PRESS ENTER or TAP to RETURN to TITLE SCREEN", 120, 220, 20, DARKBLUE);
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
+    DrawTextEx(font, "CREDITOS", (Vector2){ 20, 10 }, font.baseSize*3.0f, 4, WHITE);
+    DrawText("DESENVOLVEDORES:.\n Guilherme Wisniewski...        813319 \n Pedro Ghiotto...                812115 \n Sergio Felipe...               xxxxxx", 120, 220, 20, DARKBLUE);
 }
 
 // Ending Screen Unload logic
