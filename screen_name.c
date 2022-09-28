@@ -17,7 +17,7 @@ char name[MAX_INPUT_CHARS + 1] = "\0";
 
 typedef struct {
     double score;
-    char name[100];
+    char name[21];
 }player;
 
 player* list;
@@ -54,7 +54,7 @@ void criaranking(player* list) {
 
     qsort(list, 11, sizeof(player), compara);
 
-    for (i = 0; i < 10 && list[i].score>0; i++) {
+    for (i = 0; i < 10 && list[i].score > 0; i++) {
         fwrite(&list[i], sizeof(player), 1, pf);
     }
     fclose(pf);
@@ -72,6 +72,10 @@ int seleciona(){
     FILE* scoreatual = fopen_e_teste(PONTOS_ATUAL, "rb");
     
     list = (player*)malloc(11 * sizeof(player));
+    if (list == NULL) {
+        perror("Erro ao alocar. \n");
+        exit(1);
+    }
     fread(&x, sizeof(double), 1, scoreatual);
 
     for (i = 0; i < 11; i++) {
@@ -93,7 +97,7 @@ int seleciona(){
     }*/
     fclose(fp);
     fclose(scoreatual);
-    return cont || !zerado;
+    return (cont || !zerado);
 }
 
 // Title Screen Update logic
@@ -185,9 +189,22 @@ void DrawNameScreen(void)
         strcpy(list[10].name, name);
     }
     criaranking(list);
-    DrawText(TextFormat("rank   nome    pontos \n 1 %s  %lf \n  2  %s   %lf \n 3    %s  %lf \n 4    %s  %lf \n 5    %s  %lf\n", list[0].name, list[0].score, list[1].name, list[1].score, list[2].name, list[2].score, list[3].name, list[3].score, list[4].name, list[4]), screenWidth / 2 - 300, screenHeight / 2 + 50, 40, BLACK);
-    DrawText(TextFormat("rank   nome    pontos \n 6 %s  %lf \n  7  %s   %lf \n 8    %s  %lf \n 9    %s  %lf \n 10    %s  %lf\n", list[5].name, list[5].score, list[6].name, list[6].score, list[7].name, list[7].score, list[8].name, list[8].score, list[9].name, list[9]), screenWidth / 2 + 300, screenHeight / 2 + 50, 40, BLACK);
-    
+
+    DrawText(TextFormat("rank   nome                  pontos \n"), screenWidth / 2 + 100, screenHeight / 2 + 100, 25, GRAY);
+    DrawText(TextFormat("rank   nome                  pontos \n"), screenWidth / 2 - 500, screenHeight / 2 + 100, 25, GRAY);
+
+    for (int i = 0; i < 1; i++) {
+        DrawText(TextFormat(" %d    %s\n", i + 1, list[i].name), screenWidth / 2 - 300, screenHeight / 2 + 50, 15, GRAY);
+    }
+    for (int i = 0; i < 1; i++) {
+        DrawText(TextFormat("                             %lf\n", list[i].score), screenWidth / 2 - 300, screenHeight / 2 + 50, 15, GRAY);
+    }
+    /*for (int i = 5; i < 10; i++) {
+        DrawText(TextFormat(" %d    %s\n", i + 1, list[i].name), screenWidth / 2 + 300, screenHeight / 2 + 50, 15, GRAY);
+    }
+    for (int i = 5; i < 10; i++) {
+        DrawText(TextFormat("                             %lf\n", list[i].score), screenWidth / 2 + 300, screenHeight / 2 + 50, 15, GRAY);
+    }*/
 }
 
 // Title Screen Unload logic
