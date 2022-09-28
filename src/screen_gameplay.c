@@ -25,6 +25,12 @@ Music musica_gameplay, musica_complete;
 Sound card_flip_sound, victory_audio, gameover_audio;
 Sound attack_audio, miss_audio;
 
+//Struct do ranking
+typedef struct{
+    double pontos;
+    char nome[11];
+}Ranking;
+
 //Struct que define o conteudo das cartas. As cartas de resposta e pegunta estão no mesmo struct porque dessa maneira podem ser relacionadas pelo indice.
 typedef struct {
     int valor1, valor2;
@@ -646,10 +652,10 @@ int gameplay(void) {
     //-----------------------------Inicialização de Variáveis---------------------------------------------------
     int i;
     int pares_quantidade[4] = {6, 8, 10, 12};
+    Ranking jogador = {0,"      "};
     double tempo_total[4] = {150, 200, 250, 300};
     double pontos[4] = {0, 0, 0, 0};
     double pontos_peso[4] = {0.2, 0.75, 1, 1.45};
-    double pontos_total;
     char fase_nome[4][7] = {"FASE 1", "FASE 2", "FASE 3", "FASE 4"};
     bool gameover_win[4] = {false, false, false, false};
     bool gameover_lose[4] = {false, false, false, false};
