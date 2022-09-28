@@ -1,6 +1,9 @@
 #include "raylib.h"
 #include "screens.h"
 #include "stdio.h"
+#include <stdlib.h>
+#include "string.h"
+
 #define MAX_INPUT_CHARS     20
 #define NOME_ARQUIVO "resources/rank.bin"
 #define PONTOS_ATUAL "resources/ponto_individual.bin"
@@ -16,6 +19,8 @@ typedef struct {
     double score;
     char name[100];
 }player;
+
+player* list;
 //----------------------------------------------------------------------------------
 // Title Screen Functions Definition
 //----------------------------------------------------------------------------------
@@ -28,7 +33,7 @@ void InitNameScreen(void)
     finishScreen = 0;
 }
 
-fopen_e_teste(char* caminho, char* modo) {
+FILE* fopen_e_teste(char* caminho, char* modo) {
     FILE* f;
     f = fopen(caminho, modo);
     if (f == NULL) {
@@ -50,29 +55,31 @@ void criaranking(player* list) {
     qsort(list, 11, sizeof(player), compara);
 
     for (i = 0; i < 10 && list[i].score>0; i++) {
-        //printf("%d %s\n", list[i].score, list[i].name);
         fwrite(&list[i], sizeof(player), 1, pf);
     }
     fclose(pf);
 }
 
-int seleciona(player* list){
+int seleciona(){
     //player* list;
     player teste;
-    int i;
     double x;
-    FILE* fp = fopen_e_teste(NOME_ARQUIVO, "rb");
-    FILE* scoreatual = fopen_e_teste(PONTOS_ATUAL, "rb");
+    int i;
     int cont = 0;
     int zerado = 0;
+
+    FILE* fp = fopen_e_teste(NOME_ARQUIVO, "rb");
+    FILE* scoreatual = fopen_e_teste(PONTOS_ATUAL, "rb");
+    
     list = (player*)malloc(11 * sizeof(player));
-    fread(&teste, sizeof(player), 1, scoreatual);
-    list[10].score = teste.score;
-    for (i = 0; i < 10; i++) {
+    fread(&x, sizeof(double), 1, scoreatual);
+
+    for (i = 0; i < 11; i++) {
         list[i].score = 0;
     }
+    list[10].score = x;
 
-    while (fread(&teste, sizeof(player), 1, fp) > 0) {
+    while (fread(&teste, sizeof(player), 1, fp) > 0 && zerado<10) {
         list[zerado] = teste;
         if (list[10].score > list[zerado].score) {
             cont++;
@@ -108,14 +115,13 @@ void DrawNameScreen(void)
     const int screenWidth = 1280;
     const int screenHeight = 720;
 
-    player* list;
+    //player* list;
 
     Rectangle textBox = { screenWidth / 2.0f - 100, screenHeight / 2 - 25, 500, 60 };
     bool mouseOnText = false;
-
     // Update
     //----------------------------------------------------------------------------------
-    if (seleciona(&list)) {
+    if (seleciona()) {
         if (CheckCollisionPointRec(GetMousePosition(), textBox)) mouseOnText = true;
         else mouseOnText = false;
 
@@ -178,7 +184,9 @@ void DrawNameScreen(void)
         }
         strcpy(list[10].name, name);
     }
-    criaranking(&list);
+    criaranking(list);
+    DrawText(TextFormat("rank   nome    pontos \n 1 %s  %lf \n  2  %s   %lf \n 3    %s  %lf \n 4    %s  %lf \n 5    %s  %lf\n", list[0].name, list[0].score, list[1].name, list[1].score, list[2].name, list[2].score, list[3].name, list[3].score, list[4].name, list[4]), screenWidth / 2 - 300, screenHeight / 2 + 50, 40, BLACK);
+    DrawText(TextFormat("rank   nome    pontos \n 6 %s  %lf \n  7  %s   %lf \n 8    %s  %lf \n 9    %s  %lf \n 10    %s  %lf\n", list[5].name, list[5].score, list[6].name, list[6].score, list[7].name, list[7].score, list[8].name, list[8].score, list[9].name, list[9]), screenWidth / 2 + 300, screenHeight / 2 + 50, 40, BLACK);
     
 }
 
