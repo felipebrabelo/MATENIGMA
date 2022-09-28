@@ -1,13 +1,13 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
-#define NOME_ARQUIVO "rank.dat"
+#define NOME_ARQUIVO "rank.bin"
 typedef struct{
 	int score;
-	char name[100];
+	char name[21];
 }player;
 
-fopen_e_teste(char* caminho, char* modo){
+FILE* fopen_e_teste(char* caminho, char* modo){
 	FILE* f;
 	f = fopen(caminho, modo);
 	if(f==NULL){
@@ -17,8 +17,10 @@ fopen_e_teste(char* caminho, char* modo){
 	return f;
 }
 
-int compara(const void * a, const void * b) {
-   return ( *(int*)b - *(int*)a );
+int compara(const void* a, const void* b) {
+    player* n1 = (player*) a;
+    player* n2 = (player*) b;
+    return (n2->score - n1->score);
 }
 
 void criaranking(player* list){
