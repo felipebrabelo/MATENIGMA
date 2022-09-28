@@ -7,6 +7,16 @@ typedef struct{
 	char name[100];
 }player;
 
+fopen_e_teste(char* caminho, char* modo){
+	FILE* f;
+	f = fopen(caminho, modo);
+	if(f==NULL){
+		perror("Erro ao tentar abrir o arquivo. \n");
+		exit(1);
+	}
+	return f;
+}
+
 int compara(const void * a, const void * b) {
    return ( *(int*)b - *(int*)a );
 }
@@ -14,7 +24,7 @@ int compara(const void * a, const void * b) {
 void criaranking(player* list){
 	
 	int i;
-    FILE* pf = fopen(NOME_ARQUIVO,"wb+");
+    FILE* pf = fopen_e_teste(NOME_ARQUIVO, "wb+");
     
 	qsort(list, 11, sizeof(player), compara);
 	
@@ -28,6 +38,7 @@ void criaranking(player* list){
 void main(){
 	FILE* fp = fopen(NOME_ARQUIVO,"rb");
 	player* list;
+	player teste;
 	int i;
 	int x;
 	int cont = 0;
@@ -39,8 +50,10 @@ void main(){
 	for(i=0; i<10; i++){
 		list[i].score = 0;
 	}
-	while(fread(&list[i], sizeof(player), 1, fp) > 0){
-		if(list[10].score>list[i].score){
+	//for(i=0; i<10; i++){
+	while(fread(&teste, sizeof(player), 1, fp) > 0){
+		list[zerado] = teste;
+		if(list[10].score>list[zerado].score){
 			cont++;
 		}
 		zerado++;
