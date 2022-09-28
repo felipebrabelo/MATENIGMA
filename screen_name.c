@@ -44,7 +44,9 @@ FILE* fopen_e_teste(char* caminho, char* modo) {
 }
 
 int compara(const void* a, const void* b) {
-    return (*(int*)b - *(int*)a);
+    player* n1 = (player*) a;
+    player* n2 = (player*) b;
+    return (n2->score - n1->score);
 }
 
 void criaranking(player* list) {
@@ -54,7 +56,7 @@ void criaranking(player* list) {
 
     qsort(list, 11, sizeof(player), compara);
 
-    for (i = 0; i < 10 && list[i].score > 0; i++) {
+    for (i = 0; i < 10; i++) {
         fwrite(&list[i], sizeof(player), 1, pf);
     }
     fclose(pf);
@@ -65,7 +67,7 @@ int seleciona(){
     player teste;
     double x;
     int i;
-    int cont = 0;
+    int cont = 1;
     int zerado = 0;
 
     FILE* fp = fopen_e_teste(NOME_ARQUIVO, "rb");
@@ -81,7 +83,7 @@ int seleciona(){
     for (i = 0; i < 11; i++) {
         list[i].score = 0;
     }
-    list[10].score = x;
+    //list[10].score = x;
 
     while (fread(&teste, sizeof(player), 1, fp) > 0 && zerado<10) {
         list[zerado] = teste;
@@ -90,11 +92,9 @@ int seleciona(){
         }
         zerado++;
     }
-    /*if (cont || !zerado) {
-        scanf("%s", user);
-        strcpy(list[10].name, user);
+    if (cont || !zerado) {
         criaranking(list);
-    }*/
+    }
     fclose(fp);
     fclose(scoreatual);
     return (cont || !zerado);
@@ -123,83 +123,83 @@ void DrawNameScreen(void)
 
     Rectangle textBox = { screenWidth / 2.0f - 100, screenHeight / 2 - 25, 500, 60 };
     bool mouseOnText = false;
+    seleciona();
     // Update
     //----------------------------------------------------------------------------------
-    if (seleciona()) {
-        if (CheckCollisionPointRec(GetMousePosition(), textBox)) mouseOnText = true;
-        else mouseOnText = false;
+    /*if (CheckCollisionPointRec(GetMousePosition(), textBox)) mouseOnText = true;
+    else mouseOnText = false;
 
-        if (mouseOnText)
+    if (mouseOnText)
+    {
+        // Set the window's cursor to the I-Beam
+        SetMouseCursor(MOUSE_CURSOR_IBEAM);
+
+        // Get char pressed (unicode character) on the queue
+        int key = GetCharPressed();
+
+        // Check if more characters have been pressed on the same frame
+        while (key > 0)
         {
-            // Set the window's cursor to the I-Beam
-            SetMouseCursor(MOUSE_CURSOR_IBEAM);
-
-            // Get char pressed (unicode character) on the queue
-            int key = GetCharPressed();
-
-            // Check if more characters have been pressed on the same frame
-            while (key > 0)
+            // NOTE: Only allow keys in range [32..125]
+            if ((key >= 32) && (key <= 125) && (letterCount < MAX_INPUT_CHARS))
             {
-                // NOTE: Only allow keys in range [32..125]
-                if ((key >= 32) && (key <= 125) && (letterCount < MAX_INPUT_CHARS))
-                {
-                    name[letterCount] = (char)key;
-                    name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
-                    letterCount++;
-                }
-
-                key = GetCharPressed();  // Check next character in the queue
+                name[letterCount] = (char)key;
+                name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
+                letterCount++;
             }
 
-            if (IsKeyPressed(KEY_BACKSPACE))
-            {
-                letterCount--;
-                if (letterCount < 0) letterCount = 0;
-                name[letterCount] = '\0';
-            }
+            key = GetCharPressed();  // Check next character in the queue
         }
-        else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 
-        if (mouseOnText) framesCounter++;
-        else framesCounter = 0;
-
-        // Draw
-
-        ClearBackground(RAYWHITE);
-
-        DrawText("FIM DE JOGO", screenWidth / 2 - 200, screenHeight / 2 - 200, 50, BLACK);
-        DrawText(TextFormat("Sua pontuacao foi de: x pontos"), screenWidth / 2 - 300, screenHeight / 2 - 100, 40, GRAY);
-        DrawRectangleRec(textBox, LIGHTGRAY);
-        if (mouseOnText) DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, RED);
-        else DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
-
-        DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
-
-        DrawText(TextFormat("Digite seu Nome: %i/%i", letterCount, MAX_INPUT_CHARS), screenWidth / 2 - 500, screenHeight / 2, 30, DARKGRAY);
-
-        if (mouseOnText)
+        if (IsKeyPressed(KEY_BACKSPACE))
         {
-            if (letterCount < MAX_INPUT_CHARS)
-            {
-                // Draw blinking underscore char
-                if (((framesCounter / 20) % 2) == 0) DrawText("_", (int)textBox.x + 8 + MeasureText(name, 40), (int)textBox.y + 12, 40, MAROON);
-            }
-            else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
+            letterCount--;
+            if (letterCount < 0) letterCount = 0;
+            name[letterCount] = '\0';
         }
-        strcpy(list[10].name, name);
     }
-    criaranking(list);
+    else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
+    if (mouseOnText) framesCounter++;
+    else framesCounter = 0;
+
+    // Draw
+
+    ClearBackground(RAYWHITE);
+
+    DrawText("FIM DE JOGO", screenWidth / 2 - 200, screenHeight / 2 - 200, 50, BLACK);
+    DrawText(TextFormat("Sua pontuacao foi de: x pontos"), screenWidth / 2 - 300, screenHeight / 2 - 100, 40, GRAY);
+    DrawRectangleRec(textBox, LIGHTGRAY);
+    if (mouseOnText) DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, RED);
+    else DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
+
+    DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
+
+    DrawText(TextFormat("Digite seu Nome: %i/%i", letterCount, MAX_INPUT_CHARS), screenWidth / 2 - 500, screenHeight / 2, 30, DARKGRAY);
+
+    if (mouseOnText)
+    {
+        if (letterCount < MAX_INPUT_CHARS)
+        {
+            // Draw blinking underscore char
+            if (((framesCounter / 20) % 2) == 0) DrawText("_", (int)textBox.x + 8 + MeasureText(name, 40), (int)textBox.y + 12, 40, MAROON);
+        }
+        else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
+    }
+    strcpy(list[10].name, name);*/
+
 
     DrawText(TextFormat("rank   nome                  pontos \n"), screenWidth / 2 + 100, screenHeight / 2 + 100, 25, GRAY);
     DrawText(TextFormat("rank   nome                  pontos \n"), screenWidth / 2 - 500, screenHeight / 2 + 100, 25, GRAY);
-
-    for (int i = 0; i < 1; i++) {
+    DrawText(TextFormat(" %d    %s\n", 0 + 1, list[0].name), screenWidth / 2 - 300, screenHeight / 2 + 50, 15, GRAY);
+    DrawText(TextFormat("                             %lf\n", list[0].score), screenWidth / 2 - 300, screenHeight / 2 + 50, 15, GRAY);
+    /*for (int i = 0; i < 5; i++) {
         DrawText(TextFormat(" %d    %s\n", i + 1, list[i].name), screenWidth / 2 - 300, screenHeight / 2 + 50, 15, GRAY);
     }
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 5; i++) {
         DrawText(TextFormat("                             %lf\n", list[i].score), screenWidth / 2 - 300, screenHeight / 2 + 50, 15, GRAY);
     }
-    /*for (int i = 5; i < 10; i++) {
+    for (int i = 5; i < 10; i++) {
         DrawText(TextFormat(" %d    %s\n", i + 1, list[i].name), screenWidth / 2 + 300, screenHeight / 2 + 50, 15, GRAY);
     }
     for (int i = 5; i < 10; i++) {
