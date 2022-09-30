@@ -93,8 +93,6 @@ int main(void)
     switch (currentScreen)
     {
         case LOGO: UnloadLogoScreen(); break;
-        case TITLE: UnloadTitleScreen(); break;
-        case GAMEPLAY: UnloadGameplayScreen(); break;
         case ENDING: UnloadEndingScreen(); break;
         default: break;
     }
@@ -122,8 +120,6 @@ static void ChangeToScreen(int screen)
     switch (currentScreen)
     {
         case LOGO: UnloadLogoScreen(); break;
-        case TITLE: UnloadTitleScreen(); break;
-        //case GAMEPLAY: UnloadGameplayScreen(); break;
         case ENDING: UnloadEndingScreen(); break;
         default: break;
     }
@@ -132,8 +128,6 @@ static void ChangeToScreen(int screen)
     switch (screen)
     {
         case LOGO: InitLogoScreen(); break;
-        case TITLE: InitTitleScreen(); break;
-        //case GAMEPLAY: InitGameplayScreen(); break;
         case ENDING: InitEndingScreen(); break;
         default: break;
     }
@@ -168,9 +162,7 @@ static void UpdateTransition(void)
             switch (transFromScreen)
             {
                 case LOGO: UnloadLogoScreen(); break;
-                case TITLE: UnloadTitleScreen(); break;
                 case OPTIONS: UnloadOptionsScreen(); break;
-                case GAMEPLAY: UnloadGameplayScreen(); break;
                 case ENDING: UnloadEndingScreen(); break;
                 default: break;
             }
@@ -179,8 +171,6 @@ static void UpdateTransition(void)
             switch (transToScreen)
             {
                 case LOGO: InitLogoScreen(); break;
-                case TITLE: InitTitleScreen(); break;
-                case GAMEPLAY: InitGameplayScreen(); break;
                 case ENDING: InitEndingScreen(); break;
                 default: break;
             }
@@ -209,7 +199,7 @@ static void UpdateTransition(void)
 // Draw transition effect (full-screen rectangle)
 static void DrawTransition(void)
 {
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, transAlpha));
+    //DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, transAlpha));
 }
 
 // Update and draw game frame
@@ -217,7 +207,7 @@ static void UpdateDrawFrame(void)
 {
     // Update
     //----------------------------------------------------------------------------------
-    UpdateMusicStream(music);       // NOTE: Music keeps playing between screens
+         // NOTE: Music keeps playing between screens
     if (!onTransition)
     {
         switch(currentScreen)
@@ -233,7 +223,9 @@ static void UpdateDrawFrame(void)
             {
                 title_call();
 
-                if (FinishTitleScreen() == 1) TransitionToScreen(GAMEPLAY);
+                if (FinishTitleScreen() == 1){ 
+                    TransitionToScreen(GAMEPLAY);
+                }
                 else if (FinishTitleScreen() == 2) {
                     menu_ranking = true;
                     TransitionToScreen(RANKING);
@@ -250,14 +242,11 @@ static void UpdateDrawFrame(void)
             } break;
             case GAMEPLAY:
             {
-                gameplay();
-
-                if (FinishGameplayScreen() == 1)
+                if (gameplay() == 1)
                 {
                     menu_ranking = false;
                     TransitionToScreen(RANKING);
                 }
-                //else if (FinishGameplayScreen() == 2) TransitionToScreen(TITLE);
 
             } break;
                 
@@ -294,9 +283,8 @@ static void UpdateDrawFrame(void)
         switch(currentScreen)
         {
             case LOGO: DrawLogoScreen(); break;
-            case TITLE: DrawTitleScreen(); break;
+
             case OPTIONS: DrawOptionsScreen(); break;
-            case GAMEPLAY: DrawGameplayScreen(); break;
             case ENDING: DrawEndingScreen(); break;
             default: break;
         }

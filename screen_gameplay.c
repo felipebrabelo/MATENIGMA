@@ -1,83 +1,3 @@
-/**********************************************************************************************
-*
-*   raylib - Advance Game template
-*
-*   Gameplay Screen Functions Definitions (Init, Update, Draw, Unload)
-*
-*   Copyright (c) 2014-2022 Ramon Santamaria (@raysan5)
-*
-*   This software is provided "as-is", without any express or implied warranty. In no event
-*   will the authors be held liable for any damages arising from the use of this software.
-*
-*   Permission is granted to anyone to use this software for any purpose, including commercial
-*   applications, and to alter it and redistribute it freely, subject to the following restrictions:
-*
-*     1. The origin of this software must not be misrepresented; you must not claim that you
-*     wrote the original software. If you use this software in a product, an acknowledgment
-*     in the product documentation would be appreciated but is not required.
-*
-*     2. Altered source versions must be plainly marked as such, and must not be misrepresented
-*     as being the original software.
-*
-*     3. This notice may not be removed or altered from any source distribution.
-*
-**********************************************************************************************/
-
-#include "raylib.h"
-#include "screens.h"
-
-//----------------------------------------------------------------------------------
-// Module Variables Definition (local)
-//----------------------------------------------------------------------------------
-static int framesCounter = 0;
-static int finishScreen = 0;
-
-//----------------------------------------------------------------------------------
-// Gameplay Screen Functions Definition
-//----------------------------------------------------------------------------------
-
-// Gameplay Screen Initialization logic
-void InitGameplayScreen(void)
-{
-    // TODO: Initialize GAMEPLAY screen variables here!
-    framesCounter = 0;
-    finishScreen = 0;
-}
-
-// Gameplay Screen Update logic
-void UpdateGameplayScreen(void)
-{
-    // TODO: Update GAMEPLAY screen variables here!
-
-    // Press enter or tap to change to ENDING screen
-    if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
-    {
-        finishScreen = 1;
-        PlaySound(fxCoin);
-    }
-}
-
-// Gameplay Screen Draw logic
-void DrawGameplayScreen(void)
-{
-    // TODO: Draw GAMEPLAY screen here!
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), PURPLE);
-    DrawTextEx(font, "GAMEPLAY SCREEN", (Vector2){ 20, 10 }, font.baseSize*3, 4, MAROON);
-    DrawText("PRESS ENTER or TAP to JUMP to ENDING SCREEN", 130, 220, 20, MAROON);
-}
-
-// Gameplay Screen Unload logic
-void UnloadGameplayScreen(void)
-{
-    // TODO: Unload GAMEPLAY screen variables here!
-}
-
-// Gameplay Screen should finish?
-int FinishGameplayScreen(void)
-{
-    return 1;
-}
-
 //---------------Tela Gameplay---------------/
 
 //Biblioteca Utilizada
@@ -87,6 +7,11 @@ int FinishGameplayScreen(void)
 #include "raylib.h"
 #include <time.h>
 
+int FinishGameplayScreen(void)
+{
+    return 1;
+}
+
 //Constante importantes como a resolução do jogo e os limites dos valores aleatórios
 static const int vMin = 1;
 static const int vMax = 100;
@@ -94,16 +19,16 @@ static const int screenWidth = 1280;
 static const int screenHeight = 720;
 
 //Fonte
-Font mono;
+static Font mono;
 
 //Texturas
-Texture2D card_back, background, card_front, bg_pyramid, erros, clock_symb, bg_pyramid_win, game_complete;
-Texture2D idle, run, attack, miss, run, death;
+static Texture2D card_back, background, card_front, bg_pyramid, erros, clock_symb, bg_pyramid_win, game_complete;
+static Texture2D idle, run, attack, miss, run, death;
 
 //Sons
-Music musica_gameplay, musica_complete;
-Sound card_flip_sound, victory_audio, gameover_audio;
-Sound attack_audio, miss_audio;
+static Music musica_gameplay, musica_complete;
+static Sound card_flip_sound, victory_audio, gameover_audio;
+static Sound attack_audio, miss_audio;
 
 //Struct do ranking
 typedef struct{
@@ -133,12 +58,12 @@ typedef struct {
 } Timer;
 
 //Função que inicia a contagem de tempo do relogio
-void ComecaTimer(Timer *relogio) {
+static void ComecaTimer(Timer *relogio) {
     relogio->inicio = GetTime();
 }
 
 //Função que verifica quanto tempo passou desde o inicio da contagem
-void VerificaTimer(Timer *relogio) {
+static void VerificaTimer(Timer *relogio) {
     relogio->atual = GetTime() - relogio->inicio;
 }
 
@@ -148,7 +73,7 @@ static void DrawTextR(const char *text, int posX, int posY, int fontSize, Color 
 }
 
 //Função que cria as cartas
-void CriaCartas(Carta *cartas, int pares_quantidade) {
+static void CriaCartas(Carta *cartas, int pares_quantidade) {
 
     int cont = 0;
     bool check = false; //Flag para indicar se a resposta de uma das cartas está repetida.
@@ -214,7 +139,7 @@ void CriaCartas(Carta *cartas, int pares_quantidade) {
 }
 
 //Função que distribui as cartas. É gerado um vetor em que cada elemento indica o identificador e tipo da carta sem elementos repetidos, efetivamente distribuindo as cartas. No fim as cartas são atribuidas a um vetor de string.
-void DistribuiCartas(Carta *cartas, Posicao *pos, char **cartas_string, int pares_quantidade) {
+static void DistribuiCartas(Carta *cartas, Posicao *pos, char **cartas_string, int pares_quantidade) {
     int cont = 0;
     bool check = false;
     int i;
@@ -247,7 +172,7 @@ void DistribuiCartas(Carta *cartas, Posicao *pos, char **cartas_string, int pare
 }
 
 //Função que gera a posição das cartas na tela
-void GeraPosicaoCartasTela(Vector2 *pos_tela, int pares_quantidade, Vector2 offset) {
+static void GeraPosicaoCartasTela(Vector2 *pos_tela, int pares_quantidade, Vector2 offset) {
     int i, j, cont = 0;
     for (i = 1; i <= 4; i++) {
         for (j = 1; j <= pares_quantidade / 2; j++) {
@@ -260,7 +185,7 @@ void GeraPosicaoCartasTela(Vector2 *pos_tela, int pares_quantidade, Vector2 offs
 }
 
 //Função que gera a posição do texto das cartas na tela.
-void GeraPosicaoTextoTela(const char **cartas_string, const Vector2 *pos_carta_tela, Vector2 *pos_texto_tela,
+static void GeraPosicaoTextoTela(const char **cartas_string, const Vector2 *pos_carta_tela, Vector2 *pos_texto_tela,
                           int pares_quantidade) {
     int i;
     Vector2 offset;
@@ -273,7 +198,7 @@ void GeraPosicaoTextoTela(const char **cartas_string, const Vector2 *pos_carta_t
 }
 
 //Função que cria retângulos a serem usados para verificar colisão
-void CriaRetangulos(Rectangle *cartas_objeto, const Vector2 *pos_carta_tela, int pares_quantidade) {
+static void CriaRetangulos(Rectangle *cartas_objeto, const Vector2 *pos_carta_tela, int pares_quantidade) {
     int i;
     for (i = 0; i < pares_quantidade * 2; i++) {
         cartas_objeto[i].x = pos_carta_tela[i].x;
@@ -284,7 +209,7 @@ void CriaRetangulos(Rectangle *cartas_objeto, const Vector2 *pos_carta_tela, int
 }
 
 //Função que verifica sobre qual carta o mouse está sobre. A carta em questão é destacada com bordas vermelhas.
-void ChecaSelecao(const Rectangle *cartas_objeto, const Vector2 mouse, bool *colisao, int pares_quantidade,
+static void ChecaSelecao(const Rectangle *cartas_objeto, const Vector2 mouse, bool *colisao, int pares_quantidade,
                   const bool *flag_remover) {
     int i;
     for (i = 0; i < pares_quantidade * 2; i++) {
@@ -300,7 +225,7 @@ void ChecaSelecao(const Rectangle *cartas_objeto, const Vector2 mouse, bool *col
 }
 
 //Função que realiza a seleção da carta na tela. Caso a carta seja clicada, a seleção é atualizada e é salvo o o identificador da carta e seu número de posição
-void SelecionaCarta(int *idcarta, int *num_carta_selec, const Posicao *pos, const bool *colisao, bool *select,
+static void SelecionaCarta(int *idcarta, int *num_carta_selec, const Posicao *pos, const bool *colisao, bool *select,
                     int pares_quantidade, int num_cara_selec_ant) {
     int i;
     for (i = 0; i < pares_quantidade * 2 && !(*select); i++) {
@@ -322,7 +247,7 @@ void SelecionaCarta(int *idcarta, int *num_carta_selec, const Posicao *pos, cons
 }
 
 //Função para esperar segundos
-void EsperaSegundos(double segundos) {
+static void EsperaSegundos(double segundos) {
     Timer relogio;
     ComecaTimer(&relogio);
     VerificaTimer(&relogio);
@@ -333,7 +258,7 @@ void EsperaSegundos(double segundos) {
 }
 
 //Função que verifica se as duas cartas selecionadas formam um par
-void VerificaSePar(const int *carta_id, bool *carta_sel, int *num_carta_selec, bool *flag_remover, int *tentativas,
+static void VerificaSePar(const int *carta_id, bool *carta_sel, int *num_carta_selec, bool *flag_remover, int *tentativas,
                    int *acertos, int *tipo_anim) {
 
     if (carta_sel[0] && carta_sel[1]) {
@@ -358,7 +283,7 @@ void VerificaSePar(const int *carta_id, bool *carta_sel, int *num_carta_selec, b
 }
 
 //Função que controla a animação baseado no exemplo sprite anim. Foram usados intervalos de frames diferentes para evitar que uma influencie a outra.
-void ControleAnimacao(int *framesCounter, int *framesSpeed, int *currentFrame, Rectangle *frameRec, int *tipo) {
+static void ControleAnimacao(int *framesCounter, int *framesSpeed, int *currentFrame, Rectangle *frameRec, int *tipo) {
 
     if (*tipo == 0) {
         if (*currentFrame > 3) {
@@ -439,7 +364,7 @@ void ControleAnimacao(int *framesCounter, int *framesSpeed, int *currentFrame, R
 }
 
 //Função que gera a tela de vitória
-void TelaVitoria(int *framesCounter, int *framesSpeed, int *currentFrame, Rectangle *frameRec, Vector2 *position_anim,
+static void TelaVitoria(int *framesCounter, int *framesSpeed, int *currentFrame, Rectangle *frameRec, Vector2 *position_anim,
                  double pontos) {
     Timer relogio;
     int tipo = 3;
@@ -447,18 +372,22 @@ void TelaVitoria(int *framesCounter, int *framesSpeed, int *currentFrame, Rectan
     sprintf(pontos_string, "Pontos da Fase: %.0lf", pontos);
     Vector2 offset_win = MeasureTextEx(mono, "FASE CONCLUIDA", 50, 1);
     Vector2 offset_pontos = MeasureTextEx(mono, pontos_string, 35, 1);
-    Vector2 offset_enter = MeasureTextEx(mono, "Pressione ENTER para continuar.", 20, 1);
+    Vector2 offset_enter = MeasureTextEx(mono, "Pressione ENTER ou clique para continuar.", 20, 1);
     bool termina = false;
     ComecaTimer(&relogio);
     PlaySound(victory_audio);
-    while (!WindowShouldClose() && !termina) {
+    while (!termina) {
+        if(WindowShouldClose())
+        {
+            exit(0);
+        }
         VerificaTimer(&relogio);
         ControleAnimacao(framesCounter, framesSpeed, currentFrame, frameRec, &tipo);
         if (position_anim->x < (float) screenWidth) {
             position_anim->x += 5.0f;
         }
         if (relogio.atual > 5.0) {
-            if (IsKeyPressed(KEY_ENTER)) {
+            if (IsKeyPressed(KEY_ENTER)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 termina = true;
             }
         }
@@ -470,7 +399,7 @@ void TelaVitoria(int *framesCounter, int *framesSpeed, int *currentFrame, Rectan
         DrawTextR("FASE CONCLUIDA", screenWidth / 2 - offset_win.x / 2, 100, 50, WHITE);
         DrawTextR(pontos_string, (screenWidth - offset_pontos.x) / 2, 110 + offset_win.y, 35, WHITE);
         if (relogio.atual > 5.0) {
-            DrawTextR("Pressione ENTER para continuar.", (screenWidth - offset_enter.x) / 2,
+            DrawTextR("Pressione ENTER ou clique para continuar.", (screenWidth - offset_enter.x) / 2,
                       110 + offset_win.y + offset_pontos.y, 20, LIGHTGRAY);
         }
         DrawTextureRec(run, *frameRec, *position_anim, WHITE);
@@ -480,19 +409,23 @@ void TelaVitoria(int *framesCounter, int *framesSpeed, int *currentFrame, Rectan
 }
 
 //Função que gera a tela de derrota
-void TelaDerrota(int *framesCounter, int *framesSpeed, int *currentFrame, Rectangle *frameRec, Vector2 *position_anim) {
+static void TelaDerrota(int *framesCounter, int *framesSpeed, int *currentFrame, Rectangle *frameRec, Vector2 *position_anim) {
     Timer relogio;
     bool termina = false;
     int tipo = 4;
     Vector2 offset_lose = MeasureTextEx(mono, "GAME OVER", 70, 1);
-    Vector2 offset_enter = MeasureTextEx(mono, "Pressione ENTER para continuar.", 20, 1);
+    Vector2 offset_enter = MeasureTextEx(mono, "Pressione ENTER ou clique para continuar.", 20, 1);
     ComecaTimer(&relogio);
     PlaySound(gameover_audio);
-    while (!WindowShouldClose() && !termina) {
+    while (!termina) {
+        if(WindowShouldClose())
+        {
+            exit(0);
+        }
         VerificaTimer(&relogio);
         ControleAnimacao(framesCounter, framesSpeed, currentFrame, frameRec, &tipo);
         if (relogio.atual > 10.0) {
-            if (IsKeyPressed(KEY_ENTER)) {
+            if (IsKeyPressed(KEY_ENTER)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 termina = true;
             }
         }
@@ -503,7 +436,7 @@ void TelaDerrota(int *framesCounter, int *framesSpeed, int *currentFrame, Rectan
         DrawTexture(bg_pyramid, 0, 0, GOLD);
         DrawTextR("GAME OVER", (screenWidth - offset_lose.x) / 2, 100, 70, WHITE);
         if (relogio.atual > 10.0) {
-            DrawTextR("Pressione ENTER para continuar.", (screenWidth - offset_enter.x) / 2,
+            DrawTextR("Pressione ENTER ou clique para continuar.", (screenWidth - offset_enter.x) / 2,
                       110 + offset_lose.y, 20, LIGHTGRAY);
         }
         DrawTextureRec(death, *frameRec, *position_anim, WHITE);
@@ -512,8 +445,8 @@ void TelaDerrota(int *framesCounter, int *framesSpeed, int *currentFrame, Rectan
     }
 }
 
-//Função que gere um nível do jogo
-void GerarNivelJogo(int pares_quantidade, double tempo_total, double *pontos, double pontos_peso, bool *gameover_win,
+//Função que gera um nível do jogo
+static void GerarNivelJogo(int pares_quantidade, double tempo_total, double *pontos, double pontos_peso, bool *gameover_win,
                     bool *gameover_lose,
                     Vector2 offset, char *fase_nome) {
     //--------------------------------Inicialização---------------------------------------------------
@@ -692,7 +625,7 @@ void TelaCompleta(double pontos_total) {
         UpdateMusicStream(musica_complete);
         VerificaTimer(&relogio);
         if (relogio.atual > 5.0) {
-            if (IsKeyPressed(KEY_ENTER)) {
+            if (IsKeyPressed(KEY_ENTER)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 termina = true;
             }
         }
@@ -712,7 +645,7 @@ void TelaCompleta(double pontos_total) {
 
 }
 
-void gameplay(void) {
+int gameplay(void) {
     //-----------------------------Carragamento dos assets pro gameplay-----------------------------
     card_back = LoadTexture("resources/card_back.png");
     card_front = LoadTexture("resources/card_front.png");
@@ -801,5 +734,5 @@ void gameplay(void) {
     UnloadSound(gameover_audio);
     UnloadFont(mono);
     //-------------------------------------------------------------------------------------------
-    FinishGameplayScreen();
+    return 1;
 }

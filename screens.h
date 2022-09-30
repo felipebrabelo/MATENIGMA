@@ -56,11 +56,9 @@ void title_call(void);
 //----------------------------------------------------------------------------------
 // Title Screen Functions Declaration
 //----------------------------------------------------------------------------------
-void InitTitleScreen(void);
-void UpdateTitleScreen(void);
-void DrawTitleScreen(void);
-void UnloadTitleScreen(void);
+
 int FinishTitleScreen(void);
+void title_call(void);
 
 //----------------------------------------------------------------------------------
 // Options Screen Functions Declaration
@@ -74,12 +72,9 @@ int FinishOptionsScreen(void);
 //----------------------------------------------------------------------------------
 // Gameplay Screen Functions Declaration
 //----------------------------------------------------------------------------------
-void InitGameplayScreen(void);
-void UpdateGameplayScreen(void);
-void DrawGameplayScreen(void);
-void UnloadGameplayScreen(void);
-int FinishGameplayScreen(void);
-void gameplay(void);
+
+int gameplay(void);
+
 //----------------------------------------------------------------------------------
 // Ranking Screen Functions Declaration
 //----------------------------------------------------------------------------------

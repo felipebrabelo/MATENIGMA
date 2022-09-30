@@ -162,9 +162,9 @@ void ranking_call(void) {
     Vector2 offset_enter = MeasureTextEx(mono, "Pressione a tecla ENTER ou clique para continuar.", 20, 1);
      
     PlayMusicStream(musica_complete);
-    rank = fopen("resources/ranking.bin", "r+b");
+    fopen_e_teste(rank, "resources/ranking.bin", "r+b");
     AtualizaRanking(rank, lista);
-    rank = fopen("resources/ranking.bin", "rb");
+    fopen_e_teste(rank, "resources/ranking.bin", "rb");;
     LeRanking(rank, lista_in);
     fclose(rank);
     CriaStringRanking(lista_in, ranking_string, 10);
