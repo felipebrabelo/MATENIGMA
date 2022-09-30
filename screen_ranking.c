@@ -135,18 +135,6 @@ int FinishRankingScreen(void)
     return finishScreen;
 }
 
-static FILE *fopen_e_teste(FILE *f,char *caminho, char*modo)
-{
-    FILE *f_return;
-    f_return = fopen(caminho, modo);
-    if(f_return  == NULL)
-    {
-        perror("Erro na abertura do arquivo");
-        exit(1);
-    }
-    return f_return;
-}
-
 void ranking_call(void) {
     finishScreen = 0;
     int i;
@@ -162,9 +150,19 @@ void ranking_call(void) {
     Vector2 offset_enter = MeasureTextEx(mono, "Pressione a tecla ENTER ou clique para continuar.", 20, 1);
      
     PlayMusicStream(musica_complete);
-    fopen_e_teste(rank, "resources/ranking.bin", "r+b");
+    rank = fopen("resources/ranking.bin", "r+b");
+    if(rank == NULL)
+    {
+        perror("Erro na abertura do arquivo");
+        exit(1);
+    }
     AtualizaRanking(rank, lista);
-    fopen_e_teste(rank, "resources/ranking.bin", "rb");;
+    rank = fopen("resources/ranking.bin", "rb");
+    if(rank == NULL)
+    {
+        perror("Erro na abertura do arquivo");
+        exit(1);
+    }
     LeRanking(rank, lista_in);
     fclose(rank);
     CriaStringRanking(lista_in, ranking_string, 10);
@@ -205,13 +203,17 @@ void ranking_call_menu(void)
     mono = LoadFont("resources/Monocraft.otf");
     bg_ranking = LoadTexture("resources/Dune4.png");
     musica_complete = LoadMusicStream("resources/Sunstrider.wav");
-    
     Vector2 offset_ranking = MeasureTextEx(mono, "RANKING", 80, 1);
     Vector2 offset_enter = MeasureTextEx(mono, "Pressione a tecla ENTER ou clique para voltar ao menu.", 20, 1);
     
     PlayMusicStream(musica_complete);
     
-    rank = fopen_e_teste(rank,"resources/ranking.bin", "rb");
+    rank = fopen("resources/ranking.bin", "rb");
+    if(rank == NULL)
+    {
+        perror("Erro na abertura do arquivo");
+        exit(1);
+    }
     LeRanking(rank, lista);
     CriaStringRanking(lista,ranking_string,10);
     GeraPosicaoTextoRanking(ranking_string, 10, pos_texto_ranking);
